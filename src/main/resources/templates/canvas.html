@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Canvas test</title>
+<style>
+	canvas {
+		border: 2px solid black;
+		background-color: grey;
+	}
+	img, form {
+		display: none;
+	}
+</style>
+
+</head>
+<body>
+	<h2>Canvas Test</h2>
+	
+	<img id="player" width="40" height="40" src="img/red.png">
+	<img id="bg" width="800" height="800" src="img/bg.png">
+
+	<canvas id="area" width="500" height="400"></canvas>
+	
+	<script th:inline="javascript">
+		var canvas = document.getElementById("area");
+		var player = document.getElementById("player");
+		var ctx = canvas.getContext("2d");
+		var point = /*[[${pos}]]*/
+		var x = point[0];
+		var y = point[1]
+		var playerX = point[0];
+		var playerY = point[1];
+		var step = 5;
+		var pressed = [false, false, false, false];
+		var bgMoveFlag = true;
+		var edge = [false, false, false, false];
+
+		document.addEventListener("keydown", keyDown, false);
+		document.addEventListener("keyup", keyUp, false);
+		
+		function keyDown(e) {
+			var key = e.keyCode;
+			if(key==32) {
+				spaceKeyEvent();
+			}
+			if(key==37) {
+				pressed[2] = true;
+			}
+			if(key==38) {
+				pressed[0] = true;
+			}
+			if(key==39) {
+				pressed[3] = true;
+			}
+			if(key==40) {
+				pressed[1] = true;
+			}
+		}
+
+		function keyUp(e) {
+			var key = e.keyCode;
+			
+			if(key==37) {
+				pressed[2] = false;
+			}
+			if(key==38) {
+				pressed[0] = false;
+			}
+			if(key==39) {
+				pressed[3] = false;
+			}
+			if(key==40) {
+				pressed[1] = false;
+			}
+		}
+		
+		function drawImage() {
+			var playerImg = player;
+			var bg = document.getElementById("bg");
+
+			ctx.drawImage(bg, x, y, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+			ctx.drawImage(playerImg, playerX, playerY);
+		}
+	
+		function bgMove() {
+			if(pressed[0] && !edge[0]) {
+				y -= step;
+			}
+			if(pressed[1] && !edge[1]) {
+				y += step;
+			}
+			if(pressed[2] && !edge[2]) {
+				x -= step;
+			}
+			if(pressed[3] && !edge[3]) {
+				x += step;
+			}
+		}
+		
+		function edgeCheck() {
+			if(y < 0) {
+				y = 0;
+				edge[0] = true;
+			} else if(y > 800-canvas.height) {
+				y = 800-canvas.height;
+				edge[1] = true;
+			}
+			if(x < 0) {
+				x = 0;
+				edge[2] = true;
+			} else if(x > 800-canvas.width) {
+				x = 800-canvas.width;
+				edge[3] = true;
+			}
+		}
+		
+		function playerMove() {
+			if(pressed[0] && ((playerY > 0 && playerY <= point[1] && edge[0])||(playerY >= point[1] && playerY <= canvas.height-player.height && edge[1]))) {
+				playerY -= step;
+			}
+			if(pressed[1] && ((playerY >= 0 && playerY <= point[1] && edge[0])||(playerY >= point[1] && playerY < canvas.height-player.height && edge[1]))) {
+				playerY += step;
+			}
+			if(pressed[2] && ((playerX > 0 && playerX <= point[0] && edge[2])||(playerX >= point[0] && playerX <= canvas.width-player.width && edge[3]))) {
+				playerX -= step;
+			}
+			if(pressed[3] && ((playerX >= 0 && playerX <= point[0] && edge[2])||(playerX >= point[0] && playerX < canvas.width-player.width && edge[3]))) {
+				playerX += step;
+			}
+		}
+		
+		function moveCheck() {
+			if(edge[0] && playerY > point[1]) {
+				playerY = point[1];
+				edge[0] = false;
+			}
+			if(edge[1] && playerY < point[1]) {
+				playerY = point[1];
+				edge[1] = false;		
+			}
+			if(edge[2] && playerX > point[0]) {
+				playerX = point[0];
+				edge[2] = false;
+			}
+			if(edge[3] && playerX < point[0]) {
+				playerX = point[0];
+				edge[3] = false;
+			}
+		}
+		
+		function draw() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			drawImage();
+			
+			bgMove();
+			
+			edgeCheck();
+			
+			if(edge[0] || edge[1] || edge[2] || edge[3]) {
+				playerMove();
+				moveCheck();
+			}
+		}
+
+		setInterval(draw, 20);
+	</script>
+</body>
+</html>
