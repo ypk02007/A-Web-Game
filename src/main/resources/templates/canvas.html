@@ -17,7 +17,7 @@
 <body>
 	<h2>Canvas Test</h2>
 	
-	<img id="player" width="40" height="40" src="img/red.png">
+	<img id="player" width="80" height="80" src="img/characters/gamjeon_lying.png">
 	<img id="bg" width="800" height="800" src="img/bg.png">
 
 	<canvas id="area" width="500" height="400"></canvas>
@@ -35,26 +35,31 @@
 		var pressed = [false, false, false, false];
 		var bgMoveFlag = true;
 		var edge = [false, false, false, false];
+		var facing = 0;
 
 		document.addEventListener("keydown", keyDown, false);
 		document.addEventListener("keyup", keyUp, false);
 		
 		function keyDown(e) {
 			var key = e.keyCode;
-			if(key==32) {
+			/* if(key==32) {
 				spaceKeyEvent();
-			}
+			} */
 			if(key==37) {
 				pressed[2] = true;
+				facing = 3;
 			}
 			if(key==38) {
 				pressed[0] = true;
+				facing = 1;
 			}
 			if(key==39) {
 				pressed[3] = true;
+				facing = 4;
 			}
 			if(key==40) {
 				pressed[1] = true;
+				facing = 2;
 			}
 		}
 
@@ -77,12 +82,34 @@
 		
 		function drawImage() {
 			var playerImg = player;
+			playerImg.src = setFace();
 			var bg = document.getElementById("bg");
 
 			ctx.drawImage(bg, x, y, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
 			ctx.drawImage(playerImg, playerX, playerY);
 		}
 	
+		function setFace() {
+			var src;
+			switch(facing) {
+			case 1:
+				src = "img/characters/gamjeon_back.png";
+				break;
+			case 2:
+				src = "img/characters/gamjeon_face.png";
+				break;
+			case 3:
+				src = "img/characters/gamjeon_left.png";
+				break;
+			case 4:
+				src = "img/characters/gamjeon_right.png";
+				break;
+			default:
+				src	= "img/characters/gamjeon_lying.png"
+			}
+			return src;
+		}
+		
 		function bgMove() {
 			if(pressed[0] && !edge[0]) {
 				y -= step;

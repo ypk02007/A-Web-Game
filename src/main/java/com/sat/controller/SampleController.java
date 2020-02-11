@@ -17,7 +17,7 @@ public class SampleController {
 	@GetMapping
 	public String mainPage(Model model) {
 		//model.addAttribute("message", "This is Main Page.");
-		int[] pos = {230, 180};
+		int[] pos = {210, 160};
 		model.addAttribute("pos", pos);
 		
 		return "canvas";
