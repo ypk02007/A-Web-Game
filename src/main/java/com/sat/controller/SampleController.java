@@ -15,7 +15,12 @@ public class SampleController {
 	private ShutdownManager shutdownManager;
 	
 	@GetMapping
-	public String mainPage(Model model) {
+	public String titlePage() {
+		return "title";
+	}
+	
+	@GetMapping(value="/game")
+	public String game(Model model) {
 		//model.addAttribute("message", "This is Main Page.");
 		int[] pos = {210, 160};
 		model.addAttribute("pos", pos);

@@ -20,10 +20,10 @@
 	<img id="player" width="80" height="80" src="img/characters/gamjeon_lying.png">
 	<img id="bg" width="800" height="800" src="img/bg.png">
 
-	<canvas id="area" width="500" height="400"></canvas>
+	<canvas id="canvas" width="500" height="400"></canvas>
 	
 	<script th:inline="javascript">
-		var canvas = document.getElementById("area");
+		var canvas = document.getElementById("canvas");
 		var player = document.getElementById("player");
 		var ctx = canvas.getContext("2d");
 		var point = /*[[${pos}]]*/

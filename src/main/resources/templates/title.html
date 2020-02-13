@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>The Binding of GAMJEON</title>
+
+<style>
+	canvas {
+		border: 2px solid black;
+		background-color: grey;
+	}
+	img, form {
+		display: none;
+	}
+</style>
+
+</head>
+<body>
+
+	<img id="bg" width="500" height="400" src="img/title.png">
+
+	<canvas id="canvas" width="500" height="400"></canvas>
+	
+	<script th:inline="javascript">
+		document.addEventListener("keydown", keyDown, false);
+	
+		window.onload = function() {
+			var canvas = document.getElementById("canvas");
+			var ctx = canvas.getContext("2d");
+			var bg = new Image(500, 400);
+			bg.src = "img/title.png";
+			
+			ctx.drawImage(bg, 0, 0);
+		};
+		
+		function keyDown(e) {
+			var key = e.keyCode;
+
+			if(key==13) {
+				window.location.href="http://localhost:8888/game";
+				<!-- setInterval(draw, 20); -->
+			}
+		}
+		
+		function draw() {
+			
+		}
+		
+	</script>
+
+</body>
+</html>
