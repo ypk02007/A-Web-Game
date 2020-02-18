@@ -19,11 +19,12 @@ public class SampleController {
 		return "title";
 	}
 	
-	@GetMapping(value="/game")
-	public String game(Model model) {
-		//model.addAttribute("message", "This is Main Page.");
+	@PostMapping(value="/game")
+	public String game(Model model, String posted) {
 		int[] pos = {210, 160};
 		model.addAttribute("pos", pos);
+		
+		System.out.println("*** ["+posted+"] ***");
 		
 		return "canvas";
 	}

@@ -15,10 +15,9 @@
 
 </head>
 <body>
-	<h2>Canvas Test</h2>
 	
-	<img id="player" width="80" height="80" src="img/characters/gamjeon_lying.png">
-	<img id="bg" width="800" height="800" src="img/bg.png">
+	<img id="player" width="80" height="80" src="img/character/gamjeon_lying.png">
+	<img id="bg" width="800" height="800" src="img/bg/bg.png">
 
 	<canvas id="canvas" width="500" height="400"></canvas>
 	
@@ -93,34 +92,34 @@
 			var src;
 			switch(facing) {
 			case 1:
-				src = "img/characters/gamjeon_back.png";
+				src = "img/character/gamjeon_back.png";
 				break;
 			case 2:
-				src = "img/characters/gamjeon_face.png";
+				src = "img/character/gamjeon_face.png";
 				break;
 			case 3:
-				src = "img/characters/gamjeon_left.png";
+				src = "img/character/gamjeon_left.png";
 				break;
 			case 4:
-				src = "img/characters/gamjeon_right.png";
+				src = "img/character/gamjeon_right.png";
 				break;
 			default:
-				src	= "img/characters/gamjeon_lying.png"
+				src	= "img/character/gamjeon_lying.png"
 			}
 			return src;
 		}
 		
 		function bgMove() {
-			if(pressed[0] && !edge[0]) {
+			if(pressed[0] && !edge[1]) {
 				y -= step;
 			}
-			if(pressed[1] && !edge[1]) {
+			if(pressed[1] && !edge[0]) {
 				y += step;
 			}
-			if(pressed[2] && !edge[2]) {
+			if(pressed[2] && !edge[3]) {
 				x -= step;
 			}
-			if(pressed[3] && !edge[3]) {
+			if(pressed[3] && !edge[2]) {
 				x += step;
 			}
 		}
