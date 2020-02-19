@@ -1,0 +1,8 @@
+canvas {
+	border: 4px solid black;
+	background-color: black;
+}
+
+img, form {
+	display: none;
+}
