@@ -1,4 +1,4 @@
-package com.sat;
+package com.bog;
 
 import java.awt.Desktop;
 import java.io.IOException;
@@ -11,10 +11,10 @@ import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 
 @SpringBootApplication
-public class StandAloneTestApplication {
+public class BindingOfGamjeonApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(StandAloneTestApplication.class, args);
+		SpringApplication.run(BindingOfGamjeonApplication.class, args);
 	}
 
 	@EventListener({ApplicationReadyEvent.class})

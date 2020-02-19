@@ -3,110 +3,225 @@
 <head>
 <meta charset="UTF-8">
 <title>Canvas test</title>
-<style>
-	canvas {
-		border: 2px solid black;
-		background-color: grey;
-	}
-	img, form {
-		display: none;
-	}
-</style>
+
+<link rel="stylesheet" type="text/css" href="css/common.css">
 
 </head>
 <body>
 	
 	<img id="player" width="80" height="80" src="img/character/gamjeon_lying.png">
 	<img id="bg" width="800" height="800" src="img/bg/bg.png">
+	<img id="direction" width="10" height="10" src="img/character/direction/4.png">
+	<img id="attack" width="20" height="20" src="img/character/attack/default.png">
 
 	<canvas id="canvas" width="500" height="400"></canvas>
 	
 	<script th:inline="javascript">
 		var canvas = document.getElementById("canvas");
-		var player = document.getElementById("player");
 		var ctx = canvas.getContext("2d");
+		
+		var bg = document.getElementById("bg");
+		var player = document.getElementById("player");
+		var direction = document.getElementById("direction");
+		var attack = document.getElementById("attack");
+		
 		var point = /*[[${pos}]]*/
 		var x = point[0];
 		var y = point[1]
 		var playerX = point[0];
 		var playerY = point[1];
+		var attackX = playerX + 30;
+		var attackY = playerY + 30;
 		var step = 5;
-		var pressed = [false, false, false, false];
+		var pressed = [false, false, false, false]; // up, down, left, right
 		var bgMoveFlag = true;
 		var edge = [false, false, false, false];
-		var facing = 0;
+		var directionCode = 4;
+		var attackFlag = true;
+		var attackDirection = 4;
 
 		document.addEventListener("keydown", keyDown, false);
 		document.addEventListener("keyup", keyUp, false);
 		
 		function keyDown(e) {
 			var key = e.keyCode;
-			/* if(key==32) {
-				spaceKeyEvent();
-			} */
-			if(key==37) {
-				pressed[2] = true;
-				facing = 3;
+			
+			if(key==32 && attackFlag) {
+				attackFlag = false;
+				console.log("attackFlag = false;");
+				attackX = playerX + 30;
+				attackY = playerY + 30;
+				attackDirection = directionCode;
 			}
+			
 			if(key==38) {
 				pressed[0] = true;
-				facing = 1;
-			}
-			if(key==39) {
-				pressed[3] = true;
-				facing = 4;
-			}
-			if(key==40) {
+			} else if(key==40) {
 				pressed[1] = true;
-				facing = 2;
+			}
+			
+			if(key==37) {
+				pressed[2] = true;
+			} else if(key==39) {
+				pressed[3] = true;
 			}
 		}
 
 		function keyUp(e) {
 			var key = e.keyCode;
 			
-			if(key==37) {
-				pressed[2] = false;
-			}
 			if(key==38) {
 				pressed[0] = false;
-			}
-			if(key==39) {
-				pressed[3] = false;
-			}
-			if(key==40) {
+			} else if(key==40) {
 				pressed[1] = false;
+			}
+			
+			if(key==37) {
+				pressed[2] = false;
+			} else if(key==39) {
+				pressed[3] = false;
+			}	
+		}
+		
+		function directionCheck() {
+			if(pressed[0]) {
+				directionCode = 0;
+				if(pressed[3]) {
+					directionCode = 1;
+				} else if(pressed[2]) {
+					directionCode = 7;
+				}
+			} else if(pressed[1]) {
+				directionCode = 4;
+				if(pressed[2]) {
+					directionCode = 5;
+				} else if(pressed[3]) {
+					directionCode = 3;
+				}
+			} else if(pressed[2]) {
+				directionCode = 6;
+				if(pressed[0]) {
+					directionCode = 7;
+				} else if(pressed[1]) {
+					directionCode = 5;
+				}
+			} else if(pressed[3]) {
+				directionCode = 2;
+				if(pressed[0]) {
+					directionCode = 1;
+				} else if(pressed[1]) {
+					directionCode = 3;
+				}
 			}
 		}
 		
 		function drawImage() {
-			var playerImg = player;
-			playerImg.src = setFace();
-			var bg = document.getElementById("bg");
+			player.src = setGamjeonImg();
+			direction.src = "img/character/direction/" + directionCode + ".png";
 
 			ctx.drawImage(bg, x, y, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
-			ctx.drawImage(playerImg, playerX, playerY);
+			ctx.drawImage(player, playerX, playerY);
+			ctx.drawImage(direction, directionPosition()[0], directionPosition()[1]);
 		}
 	
-		function setFace() {
+		function setGamjeonImg() {
 			var src;
-			switch(facing) {
+			switch(directionCode) {
+			case 0:
+				src = "img/character/gamjeon_back.png";
+				break;
 			case 1:
 				src = "img/character/gamjeon_back.png";
 				break;
 			case 2:
-				src = "img/character/gamjeon_face.png";
+				src = "img/character/gamjeon_right.png";
 				break;
 			case 3:
-				src = "img/character/gamjeon_left.png";
+				src = "img/character/gamjeon_right.png";
 				break;
 			case 4:
-				src = "img/character/gamjeon_right.png";
+				src = "img/character/gamjeon_face.png";
+				break;
+			case 5:
+				src = "img/character/gamjeon_face.png";
+				break;
+			case 6:
+				src = "img/character/gamjeon_left.png";
+				break;
+			case 7:
+				src = "img/character/gamjeon_left.png";
 				break;
 			default:
 				src	= "img/character/gamjeon_lying.png"
 			}
 			return src;
+		}
+		
+		function directionPosition() {
+			switch(directionCode) {
+			case 0:
+				return [playerX + 35, playerY - 10];
+			case 1:
+				return [playerX + 70, playerY];
+			case 2:
+				return [playerX + 80, playerY + 35];
+			case 3:
+				return [playerX + 70, playerY + 70];
+			case 4:
+				return [playerX + 35, playerY + 80];
+			case 5:
+				return [playerX, playerY + 70];
+			case 6:
+				return [playerX - 10, playerY + 35];
+			case 7:
+				return [playerX, playerY];
+			default:
+				return [playerX + 35, playerY + 80];
+			}
+		}
+		
+		function drawAttack() {
+			var mx = 0;
+			var my = 0;
+			var md = 10;
+			switch(attackDirection) {
+			case 0:
+				my = -md;
+				break;
+			case 1:
+				mx = md; my = -md;
+				break;
+			case 2:
+				mx = md;
+				break;
+			case 3:
+				mx = md; my = md;
+				break;
+			case 4:
+				my = md;
+				break;
+			case 5:
+				mx = -md; my = md;
+				break;
+			case 6:
+				mx = -md;
+				break;
+			case 7:
+				mx = -md; my = -md;
+				break;
+			}
+			attackX += mx;
+			attackY += my;
+			
+			ctx.drawImage(attack, attackX, attackY);
+			
+			if(attackX < -20 || attackX > canvas.width) {
+				attackFlag = true;
+				console.log("attackFlag = true;");
+			} else if(attackY < -20 || attackY > canvas.height) {
+				attackFlag = true;
+				console.log("attackFlag = true;");
+			}
 		}
 		
 		function bgMove() {
@@ -178,7 +293,13 @@
 		function draw() {
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+			directionCheck();
+			
 			drawImage();
+			
+			if(!attackFlag) {
+				drawAttack();
+			}
 			
 			bgMove();
 			
