@@ -1,6 +1,14 @@
 canvas {
+	display: block;
+}
+#canvas {
 	border: 4px solid black;
 	background-color: black;
+}
+
+#info {
+	border: 4px solid black;
+	background-color: #2C2C2C;
 }
 
 img, form {

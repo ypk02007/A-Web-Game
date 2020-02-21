@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>The Binding of GAMJEON</title>
+
+<link rel="stylesheet" type="text/css" href="css/common.css">
+
+</head>
+<body>
+
+	<img id="sketch" width="500" height="80" src="img/info/sketch.png">
+
+	<img id="bg" width="500" height="400" src="img/bg/subway_dark.png">
+	<img id="gamjeon" width="80" height="80" src="img/character/gamjeon_face.png">
+	
+	<canvas id="info" width="500" height="80"></canvas>
+	<canvas id="canvas" width="500" height="400"></canvas>
+	
+	<script>
+		var canvas = document.getElementById("canvas");
+		var ctx = canvas.getContext("2d");
+		var info = document.getElementById("info");
+		var ctxInfo = info.getContext("2d");
+		
+		var sketch = document.getElementById("sketch");
+		var bg = document.getElementById("bg");
+		var player = document.getElementById("gamjeon");
+		
+		function draw() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			
+			drawInfo();
+			
+			drawStaticImage();
+		}
+	
+		function drawInfo() {
+			ctxInfo.drawImage(sketch, 0, 0);
+		}
+		
+		function drawStaticImage() {
+			ctx.drawImage(bg, 0, 0);
+			ctx.drawImage(gamjeon, 246, 145);
+		}
+		
+		setInterval(draw, 20);
+	</script>
+
+</body>
+</html>

@@ -35,6 +35,8 @@ function keyDown(e) {
 		prologueFlag = true;
 		bg.src = "img/bg/subway.png";
 		setInterval(draw, 20);
+	} else if (key == 13 && prologueFlag) {
+		prologueEnd();
 	}
 }
 

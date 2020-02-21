@@ -7,9 +7,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.bog.component.ShutdownManager;
+import com.bog.service.StageService;
 
 @Controller
 public class BOGController {
+	
+	@Autowired
+	private StageService stageService;
 	
 	@Autowired
 	private ShutdownManager shutdownManager;
@@ -28,11 +32,13 @@ public class BOGController {
 	}
 	
 	@PostMapping(value="/game")
-	public String game(Model model, String posted) {
+	public String stage(Model model, String posted) {
 		int[] pos = {210, 160};
 		model.addAttribute("pos", pos);
 		
-		return "canvas";
+		String stage = stageService.goToStage(posted);
+		
+		return stage;
 	}
 	
 	@PostMapping(value="/shutdown")
