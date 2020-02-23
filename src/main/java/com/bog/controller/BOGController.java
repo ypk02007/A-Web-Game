@@ -33,7 +33,7 @@ public class BOGController {
 	
 	@PostMapping(value="/game")
 	public String stage(Model model, String posted) {
-		int[] pos = {246, 135};
+		int[] pos = {210, 160};
 		model.addAttribute("pos", pos);
 		
 		String stage = stageService.goToStage(posted);

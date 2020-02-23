@@ -9,7 +9,8 @@
 </head>
 <body>
 
-	<img id="bg" width="500" height="400" src="img/bg/subway_dark.png">
+	<img id="room" width="500" height="400" src="img/bg/room/room.png">
+	<img id="floor" width="380" height="280" src="img/bg/room/control_description.png">
 	<img id="phead" width="80" height="80" src="img/character/gamjeon_head_front.png">
 	<img id="pbody" width="80" height="80" src="img/character/gamjeon_body_front.png">
 	<img id="attack" width="20" height="20" src="img/character/weapon/default.png">
@@ -21,7 +22,8 @@
 		var canvas = document.getElementById("canvas");
 		var ctx = canvas.getContext("2d");
 
-		var bg = document.getElementById("bg");
+		var room = document.getElementById("room");
+		var floor = document.getElementById("floor");
 		var phead = document.getElementById("phead");
 		var pbody = document.getElementById("pbody");
 		var attack = document.getElementById("attack");
@@ -233,7 +235,8 @@
 			pbody.src = setPlayerBody();
 			phead.src = setPlayerHead();
 
-			ctx.drawImage(bg, 0, 0);
+			ctx.drawImage(room, 0, 0);
+			ctx.drawImage(floor, 60, 60);
 			ctx.drawImage(pbody, playerX, playerY);
 			ctx.drawImage(phead, playerX, playerY);
 		}

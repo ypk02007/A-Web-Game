@@ -15,6 +15,7 @@ var tunnelLightFlag = true;
 var zzzFlag = false;
 var doorMoveFlag = false;
 var confusedFlag = false;
+var surprisedFlag = false;
 var playerMoveFlag = false;
 
 var playerX = 246;
@@ -80,6 +81,9 @@ function drawStaticImage() {
 	if (confusedFlag) {
 		ctx.drawImage(confused, 261, 115);
 	}
+	if (surprisedFlag) {
+		ctx.drawImage(surprised, playerX + 15, playerY - 30);
+	}
 }
 
 function drawTunnelLight() {
@@ -133,11 +137,21 @@ function blackout() {
 
 function playerMove() {
 	if(playerX > 86) {
+		phead.src = "img/character/gamjeon_head_left.png";
+		pbody.src = "img/character/gamjeon_body_left.png";
 		playerX -= 5;
-	} else if(playerY > 105) {
+	} else if(playerY > 115) {
+		phead.src = "img/character/gamjeon_head_back.png";
+		pbody.src = "img/character/gamjeon_body_back.png";
 		playerY -= 5;
 	} else {
-		prologueEnd();
+		playerMoveFlag = false;
+		surprisedFlag = true;
+		setTimeout(function() {
+			surprisedFlag = false;
+			playerY = 500;
+			setTimeout(prologueEnd, 2000);
+		}, 1000);
 	}
 }
 
