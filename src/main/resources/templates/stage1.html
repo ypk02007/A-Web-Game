@@ -10,6 +10,7 @@
 <body>
 
 	<img id="room" width="500" height="400" src="img/bg/room/room.png">
+	<img id="door" width="60" height="60" src="img/bg/room/door_opened.png">
 	<img id="floor" width="380" height="280" src="img/bg/room/control_description.png">
 	<img id="phead" width="80" height="80" src="img/character/gamjeon_head_front.png">
 	<img id="pbody" width="80" height="80" src="img/character/gamjeon_body_front.png">
@@ -23,6 +24,7 @@
 		var ctx = canvas.getContext("2d");
 
 		var room = document.getElementById("room");
+		var door = document.getElementById("door");
 		var floor = document.getElementById("floor");
 		var phead = document.getElementById("phead");
 		var pbody = document.getElementById("pbody");
@@ -42,6 +44,8 @@
 		var attackDirection = 2;
 		
 		var attackFlag = true;
+		var startingPointFlag = true;
+		var doors = [2, 0, 0, 0];
 		
 		var roomNo = 0;
 		
@@ -231,14 +235,47 @@
 			}
 		}
 		
+		function wallCheck() {
+			if(playerX >= 210 && playerX <= 290 && doors[0] == 2) {
+				wall[0] = -10;
+				wall[1] = 60;
+			} else if(playerX >= 210 && playerX <= 290 && doors[1] == 2) {
+				wall[0] = 10;
+				wall[1] = 40;
+			} else {
+				wall[0] = 10;
+				wall[1] = 60;
+			}
+			if(playerY >= 160 && playerY <= 240 && doors[2] == 2) {
+				wall[2] = 20;
+				wall[3] = 40;
+			} else if(playerY >= 160 && playerY <= 240 && doors[3] == 2) {
+				wall[2] = 40;
+				wall[3] = 20;
+			} else {
+				wall[2] = 40;
+				wall[3] = 40;
+			}
+		}
+		
 		function drawImage() {
 			pbody.src = setPlayerBody();
 			phead.src = setPlayerHead();
 
 			ctx.drawImage(room, 0, 0);
-			ctx.drawImage(floor, 60, 60);
+			drawDoor();
+			if(startingPointFlag) {
+				ctx.drawImage(floor, 60, 60);
+			} else {
+				ctx.fillStyle = 'grey';
+				ctx.fillRect(60, 60, floor.width, floor.height);
+			}
 			ctx.drawImage(pbody, playerX, playerY);
 			ctx.drawImage(phead, playerX, playerY);
+		}
+		
+		function drawDoor() {
+			ctx.drawImage(door, 220, 0);
 		}
 		
 		function draw() {
@@ -251,6 +288,8 @@
 			if(!attackFlag) {
 				drawAttack();
 			}
+			
+			wallCheck();
 			
 			playerMove();
 		}
