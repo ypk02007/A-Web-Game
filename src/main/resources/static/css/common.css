@@ -14,9 +14,3 @@ canvas {
 img, form {
 	display: none;
 }
-
-.rotate90 {
-	transform: rotate(90deg) translateY(-100%);
-	-webkit-transform: rotate(90deg) translateY(-100%);
-	-ms-transform: rotate(90deg) translateY(-100%);
-}
