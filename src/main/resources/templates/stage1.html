@@ -10,7 +10,6 @@
 <body>
 
 	<img id="room" width="500" height="400" src="img/bg/room/room.png">
-	<img id="door" width="60" height="60" src="img/bg/room/door_opened.png">
 	<img id="floor" width="380" height="280" src="img/bg/room/control_description.png">
 	<img id="phead" width="80" height="80" src="img/character/gamjeon_head_front.png">
 	<img id="pbody" width="80" height="80" src="img/character/gamjeon_body_front.png">
@@ -24,7 +23,7 @@
 		var ctx = canvas.getContext("2d");
 
 		var room = document.getElementById("room");
-		var door = document.getElementById("door");
+		var door = [null, null, null, null];
 		var floor = document.getElementById("floor");
 		var phead = document.getElementById("phead");
 		var pbody = document.getElementById("pbody");
@@ -43,17 +42,45 @@
 		var directionCode = 4;
 		var attackDirection = 2;
 		
+		var movableFlag = true;
 		var attackFlag = true;
 		var startingPointFlag = true;
-		var doors = [2, 0, 0, 0];
+		var doors = [2, 2, 2, 2]; // top, bottom, left, right
 		
 		var roomNo = 0;
 		
 		document.addEventListener("keydown", keyDown, false);
 		document.addEventListener("keyup", keyUp, false);
 		
+		window.onload = function() {
+			roomInit();
+			setInterval(draw, 20);
+		};
+		
+		function roomInit() {
+			for(var i = 0; i < doors.length; i++) {
+				var doorImg = document.createElement("img");
+				doorImg.setAttribute("width", "60");
+				doorImg.setAttribute("height", "60");
+				
+				if(doors[i] == 1) {
+					doorImg.setAttribute("src", "img/bg/room/door_closed.png");
+					doorImg.className = "rotate90";
+					door[i] = doorImg;
+				} else if(doors[i] == 2) {
+					doorImg.setAttribute("src", "img/bg/room/door_opened.png");
+					doorImg.className = "rotate90";
+					door[i] = doorImg;
+				}
+			}
+		}
+		
 		function keyDown(e) {
 			var key = e.keyCode;
+			
+			if(!movableFlag) {
+				return;
+			}
 			
 			if(key==87) {
 				pressed[0] = true;
@@ -236,20 +263,20 @@
 		}
 		
 		function wallCheck() {
-			if(playerX >= 210 && playerX <= 290 && doors[0] == 2) {
+			if(playerX >= 200 && playerX <= 220 && playerY < (canvas.height/2-pbody.height/2) && doors[0] == 2) {
 				wall[0] = -10;
 				wall[1] = 60;
-			} else if(playerX >= 210 && playerX <= 290 && doors[1] == 2) {
+			} else if(playerX >= 200 && playerX <= 220 && doors[1] == 2) {
 				wall[0] = 10;
 				wall[1] = 40;
 			} else {
 				wall[0] = 10;
 				wall[1] = 60;
 			}
-			if(playerY >= 160 && playerY <= 240 && doors[2] == 2) {
+			if(playerY >= 150 && playerY <= 170 && playerX < (canvas.width/2-pbody.width/2) && doors[2] == 2) {
 				wall[2] = 20;
 				wall[3] = 40;
-			} else if(playerY >= 160 && playerY <= 240 && doors[3] == 2) {
+			} else if(playerY >= 150 && playerY <= 170 && doors[3] == 2) {
 				wall[2] = 40;
 				wall[3] = 20;
 			} else {
@@ -275,7 +302,42 @@
 		}
 		
 		function drawDoor() {
-			ctx.drawImage(door, 220, 0);
+			for(var i = 0; i < door.length; i++) {
+				if(door[i]==null) {
+					continue;
+				}
+				
+				var dx;
+				var dy;
+				
+				switch(i) {
+				case 0:
+					dx = 220; dy = 0;
+					break;
+				case 1:
+					dx = 220; dy = canvas.height - door[i].height;
+					break;
+				case 2:
+					dx = 0; dy = 170;
+					break;
+				case 3:
+					dx = canvas.width - door[i].width; dy = 170;
+					break;
+				}
+				ctx.drawImage(door[i], dx, dy);
+			}
+		}
+		
+		function doorCheck() {
+			if(playerY == -10) {
+				console.log("door top");
+			} else if(playerY == (canvas.height-(pbody.height+40))) {
+				console.log("door bottom");
+			} else if(playerX == 20) {
+				console.log("door left");
+			} else if(playerX == (canvas.width-(pbody.width+20))) {
+				console.log("door right");
+			}
 		}
 		
 		function draw() {
@@ -292,9 +354,9 @@
 			wallCheck();
 			
 			playerMove();
+			
+			doorCheck();
 		}
-		
-		setInterval(draw, 20);
 	</script>
 
 </body>
