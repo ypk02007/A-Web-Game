@@ -19,8 +19,11 @@
 	<canvas id="canvas" width="500" height="400"></canvas>
 	
 	<script th:inline="javascript">
+		/*<![CDATA[*/
 		var canvas = document.getElementById("canvas");
+		var infoCanvas = document.getElementById("info");
 		var ctx = canvas.getContext("2d");
+		var ctx2 = infoCanvas.getContext("2d");
 		const cw = canvas.width;
 		const ch = canvas.height;
 
@@ -31,10 +34,11 @@
 		var pbody = document.getElementById("pbody");
 		var attack = document.getElementById("attack");
 		
+		var playerInfo;
 		var drawInterval;
 		
 		var wall = [10, 60, 40, 40]; // top, bottom, left, right
-		var point = /*[[${pos}]]*/;
+		var point = [[${pos}]];
 		var playerX = point[0];
 		var playerY = point[1];
 		var attackX = playerX + 30;
@@ -55,25 +59,31 @@
 		document.addEventListener("keyup", keyUp, false);
 		
 		window.onload = function() {
-			roomInit();
-			drawInterval = setInterval(draw, 20);
+			init();
 		};
 		
-		function roomInit() {
-			var dummyRoom = document.createElement("img");
-			dummyRoom.setAttribute("width", "60");
-			dummyRoom.setAttribute("height", "60");
-			dummyRoom.setAttribute("src", "img/bg/room/room_dummy.png");
-			dummyRoom.setAttribute("id", "dummyRoom");
-			document.body.appendChild(dummyRoom);
-			
-			var dummy = document.createElement("img");
-			dummy.setAttribute("width", "60");
-			dummy.setAttribute("height", "60");
-			dummy.setAttribute("src", "img/character/gamjeon_lying.png");
-			dummy.setAttribute("id", "dummy");
-			document.body.appendChild(dummy);
-			
+		function init() {
+			doorSetting();
+			playerInfo = {
+				coin: [[${playerInfo.coin}]],
+				bomb: [[${playerInfo.bomb}]],
+				key: [[${playerInfo.key}]],
+				weapon: [[${playerInfo.weapon}]],
+				item: [[${playerInfo.item}]],
+				status: {
+					life: [[${playerInfo.status.life}]],
+					maxLife: [[${playerInfo.status.maxLife}]],
+					attack: [[${playerInfo.status.attack}]],
+					speed: [[${playerInfo.status.speed}]],
+					range: [[${playerInfo.status.range}]]
+				}
+			};
+			infoSetting();
+			setInterval(drawInfo, 20);
+			drawInterval = setInterval(draw, 20);
+		}
+		
+		function doorSetting() {
 			for(var i = 0; i < doors.length; i++) {
 				if(doors[i] == 0) {
 					continue;
@@ -91,6 +101,15 @@
 					door[i] = doorImg;
 				}
 			}
+		}
+		
+		function infoSetting() {
+			var life = document.createElement("img");
+			life.setAttribute("width", "30");
+			life.setAttribute("height", "30");
+			life.setAttribute("src", "img/info/heart.png");
+			life.setAttribute("id", "life");
+			document.body.appendChild(life);
 		}
 		
 		function keyDown(e) {
@@ -381,8 +400,6 @@
 			var sliceY;
 			var change;
 			
-			var dummyRoom = document.getElementById("dummyRoom");
-			
 			switch(dir) {
 			case 0:
 				sliceX = 0; sliceY = 20;
@@ -416,7 +433,7 @@
 				x += sliceX; y += sliceY;
 				rx += sliceX; ry += sliceY;
 				
-				ctx.drawImage(dummyRoom, x, y);
+				ctx.drawImage(room, x, y);
 				ctx.drawImage(room, rx, ry);
 				
 				if(rx == 0 && ry == 0) {
@@ -445,6 +462,13 @@
 			
 			doorCheck();
 		}
+		
+		function drawInfo() {
+			var life = document.getElementById("life");
+			ctx2.clearRect(0, 0, infoCanvas.width, infoCanvas.height);
+			ctx2.drawImage(life, 0, 0);
+		}
+		/*]]>*/
 	</script>
 
 </body>
