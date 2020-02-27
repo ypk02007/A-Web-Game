@@ -9,6 +9,14 @@
 </head>
 <body>
 
+	<img id="info_heart" width="30" height="30" src="img/info/heart.png">
+	<img id="info_heart_half" width="30" height="30" src="img/info/heart_half.png">
+	<img id="info_coin" width="20" height="20" src="img/info/coin.png">
+	<img id="info_bomb" width="20" height="20" src="img/info/bomb.png">
+	<img id="info_key" width="20" height="20" src="img/info/key.png">
+	<img id="info_map" width="20" height="15" src="img/info/map.png">
+	<img id="info_inventory" width="105" height="70" src="img/info/inventory.png">
+
 	<img id="room" width="500" height="400" src="img/bg/room/room.png">
 	<img id="floor" width="380" height="280" src="img/bg/room/control_description.png">
 	<img id="phead" width="80" height="80" src="img/character/gamjeon_head_front.png">
@@ -78,7 +86,6 @@
 					range: [[${playerInfo.status.range}]]
 				}
 			};
-			infoSetting();
 			setInterval(drawInfo, 20);
 			drawInterval = setInterval(draw, 20);
 		}
@@ -101,15 +108,6 @@
 					door[i] = doorImg;
 				}
 			}
-		}
-		
-		function infoSetting() {
-			var life = document.createElement("img");
-			life.setAttribute("width", "30");
-			life.setAttribute("height", "30");
-			life.setAttribute("src", "img/info/heart.png");
-			life.setAttribute("id", "life");
-			document.body.appendChild(life);
 		}
 		
 		function keyDown(e) {
@@ -464,9 +462,31 @@
 		}
 		
 		function drawInfo() {
-			var life = document.getElementById("life");
+			var coin = document.getElementById("info_coin");
+			var bomb = document.getElementById("info_bomb");
+			var key = document.getElementById("info_key");
+			var inventory = document.getElementById("info_inventory");
+			var heart = document.getElementById("info_heart");
+			var heart_half = document.getElementById("info_heart_half");
+			var life = playerInfo.status.life;
+			var i = 0;
+			
 			ctx2.clearRect(0, 0, infoCanvas.width, infoCanvas.height);
-			ctx2.drawImage(life, 0, 0);
+			
+			ctx2.drawImage(coin, 135, 5);
+			ctx2.drawImage(bomb, 135, 31);
+			ctx2.drawImage(key, 135, 58);
+			ctx2.drawImage(inventory, 220, 5);
+			while(life>0) {
+				if(life>1) {
+					ctx2.drawImage(heart, 37*i + 330, 6);
+					life -= 2;
+				} else {
+					ctx2.drawImage(heart_half, 37*i + 330, 6);
+					life--;
+				}
+				i++;
+			}
 		}
 		/*]]>*/
 	</script>
