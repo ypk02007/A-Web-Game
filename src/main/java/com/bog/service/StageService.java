@@ -3,6 +3,7 @@ package com.bog.service;
 import org.springframework.stereotype.Service;
 
 import com.bog.model.PlayerInfo;
+import com.bog.model.Room;
 import com.bog.model.Status;
 
 @Service
@@ -23,7 +24,7 @@ public class StageService {
 		
 		switch(name) {
 		case "gamjeon":
-			status = new Status(5, 6, 3, 5, 300);
+			status = new Status(6, 6, 3, 5, 300);
 			playerInfo = new PlayerInfo(0, 0, 0, 1, 0, status);
 			break;
 		default:
@@ -32,4 +33,5 @@ public class StageService {
 		
 		return playerInfo;
 	}
+	
 }

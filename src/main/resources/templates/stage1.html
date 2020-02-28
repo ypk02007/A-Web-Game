@@ -468,14 +468,35 @@
 			var inventory = document.getElementById("info_inventory");
 			var heart = document.getElementById("info_heart");
 			var heart_half = document.getElementById("info_heart_half");
+			var count;
 			var life = playerInfo.status.life;
 			var i = 0;
 			
 			ctx2.clearRect(0, 0, infoCanvas.width, infoCanvas.height);
 			
+			ctx2.font = "20px Arial";
+			
 			ctx2.drawImage(coin, 135, 5);
-			ctx2.drawImage(bomb, 135, 31);
-			ctx2.drawImage(key, 135, 58);
+			count = playerInfo.coin;
+			if(count<10) {
+				count = "0"+count;
+			}
+			ctx2.fillText("x " + count, 165, 20);
+			
+			ctx2.drawImage(bomb, 135, 30);
+			count = playerInfo.bomb;
+			if(count<10) {
+				count = "0"+count;
+			}
+			ctx2.fillText("x " + count, 165, 46);
+			
+			ctx2.drawImage(key, 135, 55);
+			count = playerInfo.key;
+			if(count<10) {
+				count = "0"+count;
+			}
+			ctx2.fillText("x " + count, 165, 73);
+			
 			ctx2.drawImage(inventory, 220, 5);
 			while(life>0) {
 				if(life>1) {
