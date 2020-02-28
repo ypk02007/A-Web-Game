@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import com.bog.component.ShutdownManager;
 import com.bog.model.PlayerInfo;
+import com.bog.model.Room;
 import com.bog.service.StageService;
 
 @Controller
@@ -39,6 +40,9 @@ public class BOGController {
 		
 		PlayerInfo playerInfo = stageService.playerInfoInit("gamjeon");
 		model.addAttribute("playerInfo", playerInfo);
+		
+		Room[] roomInfo = stageService.roomInfoInit();
+		model.addAttribute("roomInfo", roomInfo);
 		
 		String stage = stageService.goToStage(posted);
 		

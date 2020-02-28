@@ -42,6 +42,8 @@
 		var pbody = document.getElementById("pbody");
 		var attack = document.getElementById("attack");
 		
+		var roomInfo = [];
+		var roomNo;
 		var playerInfo;
 		var drawInterval;
 		
@@ -60,8 +62,8 @@
 		
 		var controlFlag = true;
 		var attackFlag = true;
-		var startingPointFlag = true;
-		var doors = [2, 2, 2, 2]; // top, bottom, left, right
+		
+		var roomNo = 0;
 		
 		document.addEventListener("keydown", keyDown, false);
 		document.addEventListener("keyup", keyUp, false);
@@ -71,7 +73,18 @@
 		};
 		
 		function init() {
-			doorSetting();
+			
+			[# th:each="infoInit : ${roomInfo}"]
+				var roomInfoInit = {
+					doors: [[${infoInit.doors}]],
+					linked: [[${infoInit.linked}]],
+					visited: [[${infoInit.visited}]]
+				};
+				roomInfo.push(roomInfoInit);	
+			[/]
+			
+			roomNo = 0;
+			
 			playerInfo = {
 				coin: [[${playerInfo.coin}]],
 				bomb: [[${playerInfo.bomb}]],
@@ -86,11 +99,14 @@
 					range: [[${playerInfo.status.range}]]
 				}
 			};
+			doorSetting();
 			setInterval(drawInfo, 20);
 			drawInterval = setInterval(draw, 20);
 		}
 		
 		function doorSetting() {
+			var doors = roomInfo[roomNo].doors;
+			
 			for(var i = 0; i < doors.length; i++) {
 				if(doors[i] == 0) {
 					continue;
@@ -298,6 +314,8 @@
 		}
 		
 		function wallCheck() {
+			var doors = roomInfo[roomNo].doors;
+			
 			if(playerX >= 200 && playerX <= 220 && playerY < (ch/2-pbody.height/2) && doors[0] == 2) {
 				wall[0] = -10;
 				wall[1] = 60;
@@ -326,7 +344,7 @@
 
 			ctx.drawImage(room, 0, 0);
 			drawDoor();
-			if(startingPointFlag) {
+			if(roomNo == 0) {
 				ctx.drawImage(floor, 60, 60);
 			} else {
 				ctx.fillStyle = 'grey';
@@ -397,6 +415,9 @@
 			var sliceX;
 			var sliceY;
 			var change;
+			
+			roomNo = roomInfo[roomNo].linked[dir];
+			doorSetting();
 			
 			switch(dir) {
 			case 0:
