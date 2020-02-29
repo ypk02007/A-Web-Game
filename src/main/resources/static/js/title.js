@@ -2,6 +2,7 @@ var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 
 var bg = document.getElementById("bg");
+var skip = document.getElementById("skip");
 var doorLeft = document.getElementById("doorLeft");
 var doorRight = document.getElementById("doorRight");
 var tunnelLight = document.getElementById("tunnelLight");
@@ -59,6 +60,8 @@ function draw() {
 	drawStaticImage();
 
 	blackout();
+	
+	ctx.drawImage(skip, canvas.width - skip.width - 20, canvas.height - skip.height - 20);
 	
 	if(playerMoveFlag) {
 		playerMove();

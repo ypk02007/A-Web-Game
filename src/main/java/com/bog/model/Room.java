@@ -15,4 +15,5 @@ public class Room {
 	
 	private int visited; // 0: not found 1: able to visit 2: visited already
 	
+	private int[] map;
 }

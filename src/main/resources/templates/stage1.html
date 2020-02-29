@@ -15,6 +15,8 @@
 	<img id="info_bomb" width="20" height="20" src="img/info/bomb.png">
 	<img id="info_key" width="20" height="20" src="img/info/key.png">
 	<img id="info_map" width="20" height="15" src="img/info/map.png">
+	<img id="info_map_bright" width="20" height="15" src="img/info/map_bright.png">
+	<img id="info_map_dark" width="20" height="15" src="img/info/map_dark.png">
 	<img id="info_inventory" width="105" height="70" src="img/info/inventory.png">
 
 	<img id="room" width="500" height="400" src="img/bg/room/room.png">
@@ -78,7 +80,8 @@
 				var roomInfoInit = {
 					doors: [[${infoInit.doors}]],
 					linked: [[${infoInit.linked}]],
-					visited: [[${infoInit.visited}]]
+					visited: [[${infoInit.visited}]],
+					map: [[${infoInit.map}]]
 				};
 				roomInfo.push(roomInfoInit);	
 			[/]
@@ -109,6 +112,7 @@
 			
 			for(var i = 0; i < doors.length; i++) {
 				if(doors[i] == 0) {
+					door[i] = null;
 					continue;
 				}
 				
@@ -347,7 +351,7 @@
 			if(roomNo == 0) {
 				ctx.drawImage(floor, 60, 60);
 			} else {
-				ctx.fillStyle = 'grey';
+				ctx.fillStyle = '#C3C3C3';
 				ctx.fillRect(60, 60, floor.width, floor.height);
 			}
 			ctx.drawImage(pbody, playerX, playerY);
@@ -417,6 +421,19 @@
 			var change;
 			
 			roomNo = roomInfo[roomNo].linked[dir];
+			
+			var doors = roomInfo[roomNo].doors;
+			var linked = roomInfo[roomNo].linked;
+			
+			roomInfo[roomNo].visited = 2;
+			for(var i = 0; i < linked.length; i++) {
+				if(doors[i]==0) {
+					continue;
+				}
+				if(roomInfo[linked[i]].visited==0) {
+					roomInfo[linked[i]].visited = 1;
+				}
+			}
 			doorSetting();
 			
 			switch(dir) {
@@ -424,27 +441,25 @@
 				sliceX = 0; sliceY = 20;
 				rx = 0; ry = -ch;
 				playerX = 210; playerY = 260;
-				console.log("move to north room");
 				break;
 			case 1:
 				sliceX = 0; sliceY = -20;
 				rx = 0; ry = ch;
 				playerX = 210; playerY = 10;
-				console.log("move to south room");
 				break;
 			case 2:
 				sliceX = 20; sliceY = 0;
 				rx = -cw; ry = 0;
 				playerX = 360; playerY = 160;
-				console.log("move to west room");
 				break;
 			case 3:
 				sliceX = -20; sliceY = 0;
 				rx = cw; ry = 0;
 				playerX = 40; playerY = 160;
-				console.log("move to east room");
 				break;
 			}
+			
+			ctx.fillStyle = '#C3C3C3';
 			
 			var interval = setInterval(function() {
 				ctx.clearRect(0, 0, cw, ch);
@@ -453,7 +468,9 @@
 				rx += sliceX; ry += sliceY;
 				
 				ctx.drawImage(room, x, y);
+				ctx.fillRect(x + 60, y + 60, floor.width, floor.height);
 				ctx.drawImage(room, rx, ry);
+				ctx.fillRect(rx + 60, ry + 60, floor.width, floor.height);
 				
 				if(rx == 0 && ry == 0) {
 					clearInterval(interval);
@@ -483,6 +500,9 @@
 		}
 		
 		function drawInfo() {
+			var map = document.getElementById("info_map");
+			var map_dark = document.getElementById("info_map_dark");
+			var map_bright = document.getElementById("info_map_bright");
 			var coin = document.getElementById("info_coin");
 			var bomb = document.getElementById("info_bomb");
 			var key = document.getElementById("info_key");
@@ -496,6 +516,18 @@
 			ctx2.clearRect(0, 0, infoCanvas.width, infoCanvas.height);
 			
 			ctx2.font = "20px Arial";
+			
+			for(var j = 0; j < roomInfo.length; j++) {
+				if(roomInfo[j].visited==0) {
+					continue;
+				} else if(roomInfo[j].visited==1) {
+					ctx2.drawImage(map_dark, 20 * roomInfo[j].map[1] + 6, 15 * roomInfo[j].map[0] + 3);
+				} else if(j == roomNo) {
+					ctx2.drawImage(map_bright, 20 * roomInfo[j].map[1] + 6, 15 * roomInfo[j].map[0] + 3);				
+				} else {
+					ctx2.drawImage(map, 20 * roomInfo[j].map[1] + 6, 15 * roomInfo[j].map[0] + 3);
+				}
+			}
 			
 			ctx2.drawImage(coin, 135, 5);
 			count = playerInfo.coin;
