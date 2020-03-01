@@ -13,7 +13,7 @@ public class Status {
 	
 	private int maxLife;
 	
-	private int attack;
+	private int damage;
 	
 	private int speed;
 	

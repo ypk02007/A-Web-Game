@@ -12,7 +12,7 @@ public class StageService {
 	public String goToStage(String str) {
 		switch(str) {
 		case "GAMJEON":
-			return "stage1";
+			return "game";
 		default:
 			return "title";	
 		}
@@ -24,7 +24,7 @@ public class StageService {
 		
 		switch(name) {
 		case "gamjeon":
-			status = new Status(6, 6, 3, 5, 300);
+			status = new Status(6, 6, 3, 5, 20);
 			playerInfo = new PlayerInfo(0, 0, 0, 1, 0, status);
 			break;
 		default:

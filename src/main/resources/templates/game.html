@@ -14,9 +14,6 @@
 	<img id="info_coin" width="20" height="20" src="img/info/coin.png">
 	<img id="info_bomb" width="20" height="20" src="img/info/bomb.png">
 	<img id="info_key" width="20" height="20" src="img/info/key.png">
-	<img id="info_map" width="20" height="15" src="img/info/map.png">
-	<img id="info_map_bright" width="20" height="15" src="img/info/map_bright.png">
-	<img id="info_map_dark" width="20" height="15" src="img/info/map_dark.png">
 	<img id="info_inventory" width="105" height="70" src="img/info/inventory.png">
 
 	<img id="room" width="500" height="400" src="img/bg/room/room.png">
@@ -53,9 +50,7 @@
 		var point = [[${pos}]];
 		var playerX = point[0];
 		var playerY = point[1];
-		var attackX = playerX + 30;
-		var attackY = playerY + 30;
-		var step = 5;
+		var attacks = [];
 		
 		var pressed = [false, false, false, false]; // up, down, left, right
 		
@@ -86,8 +81,6 @@
 				roomInfo.push(roomInfoInit);	
 			[/]
 			
-			roomNo = 0;
-			
 			playerInfo = {
 				coin: [[${playerInfo.coin}]],
 				bomb: [[${playerInfo.bomb}]],
@@ -97,7 +90,7 @@
 				status: {
 					life: [[${playerInfo.status.life}]],
 					maxLife: [[${playerInfo.status.maxLife}]],
-					attack: [[${playerInfo.status.attack}]],
+					damage: [[${playerInfo.status.damage}]],
 					speed: [[${playerInfo.status.speed}]],
 					range: [[${playerInfo.status.range}]]
 				}
@@ -166,9 +159,55 @@
 		function attackSetting(dir) {
 			if(attackFlag) {
 				attackFlag = false;
-				attackX = playerX + 30;
-				attackY = playerY + 30;
-				attackDirection = dir;
+				
+				var mx = 0;
+				var my = 0;
+				var md = 10;
+				switch(dir) {
+				case 1:
+					my = -md;
+					break;
+				case 2:
+					my = md;
+					break;
+				case 3:
+					mx = -md;
+					break;
+				case 4:
+					mx = md;
+					break;
+				}
+				var attackObj = {
+					mx: mx,
+					my: my,
+					x: playerX + 30,
+					y: playerY + 30,
+					validCount: 0,
+					move: function() {
+						this.x += this.mx;
+						this.y += this.my;
+						this.validCount++;
+					},
+					isValid: function() {
+						if(this.x < wall[2] || this.x > cw - wall[3]) {
+							console.log("attack removed by wall left or wall right");
+							return false;
+						} else if(this.y < wall[0] || this.y > ch - wall[1]) {
+							console.log("attack removed by wall top or wall bottom");
+							return false;
+						} else if(this.validCount == playerInfo.status.range) {
+							console.log("attack removed because of range limit");
+							return false;
+						} else {
+							return true;
+						}
+					}
+				};
+				attacks.push(attackObj);
+				
+				setTimeout(function() {
+					attackFlag = true;	
+				}, 250);
 			}
 		}
 
@@ -273,47 +312,32 @@
 		}
 		
 		function drawAttack() {
-			var mx = 0;
-			var my = 0;
-			var md = 10;
-			switch(attackDirection) {
-			case 1:
-				my = -md;
-				break;
-			case 2:
-				my = md;
-				break;
-			case 3:
-				mx = -md;
-				break;
-			case 4:
-				mx = md;
-				break;
+			var remove = [];
+			for(var i = 0; i < attacks.length; i++) {
+				if(attacks[i].isValid()) {
+					attacks[i].move();
+					ctx.drawImage(attack, attacks[i].x, attacks[i].y);
+				} else {
+					remove.push(i);
+				}
 			}
-			attackX += mx;
-			attackY += my;
-			
-			ctx.drawImage(attack, attackX, attackY);
-			
-			if(attackX < -20 || attackX > cw) {
-				attackFlag = true;
-			} else if(attackY < -20 || attackY > ch) {
-				attackFlag = true;
+			for(var i = remove.length; i > 0; i--) {
+				attacks.splice(remove[i-1], 1);
 			}
 		}
 		
 		function playerMove() {
 			if(pressed[0] && (playerY > wall[0])) {
-				playerY -= step;
+				playerY -= playerInfo.status.speed;
 			}
 			if(pressed[1] && (playerY < ch-(wall[1]+pbody.height))) {
-				playerY += step;
+				playerY += playerInfo.status.speed;
 			}
 			if(pressed[2] && (playerX > wall[2])) {
-				playerX -= step;
+				playerX -= playerInfo.status.speed;
 			}
 			if(pressed[3] && (playerX < cw-(wall[3]+pbody.width))) {
-				playerX += step;
+				playerX += playerInfo.status.speed;
 			}
 		}
 		
@@ -476,7 +500,6 @@
 					clearInterval(interval);
 					drawInterval = setInterval(draw, 20);
 					controlFlag = true;
-					console.log("moveRoom() stopped");
 				}
 			}, 20);
 		}
@@ -488,7 +511,7 @@
 			
 			directionCheck();
 			
-			if(!attackFlag) {
+			if(attacks.length > 0) {
 				drawAttack();
 			}
 			
@@ -500,9 +523,6 @@
 		}
 		
 		function drawInfo() {
-			var map = document.getElementById("info_map");
-			var map_dark = document.getElementById("info_map_dark");
-			var map_bright = document.getElementById("info_map_bright");
 			var coin = document.getElementById("info_coin");
 			var bomb = document.getElementById("info_bomb");
 			var key = document.getElementById("info_key");
@@ -521,13 +541,15 @@
 				if(roomInfo[j].visited==0) {
 					continue;
 				} else if(roomInfo[j].visited==1) {
-					ctx2.drawImage(map_dark, 20 * roomInfo[j].map[1] + 6, 15 * roomInfo[j].map[0] + 3);
+					ctx2.fillStyle = "#585858";
 				} else if(j == roomNo) {
-					ctx2.drawImage(map_bright, 20 * roomInfo[j].map[1] + 6, 15 * roomInfo[j].map[0] + 3);				
+					ctx2.fillStyle = "#FFFFFF";			
 				} else {
-					ctx2.drawImage(map, 20 * roomInfo[j].map[1] + 6, 15 * roomInfo[j].map[0] + 3);
+					ctx2.fillStyle = "#C3C3C3";
 				}
+				ctx2.fillRect(22 * roomInfo[j].map[1] + 6, 17 * roomInfo[j].map[0] + 3, 20, 15);
 			}
+			ctx2.fillStyle = "#000000";
 			
 			ctx2.drawImage(coin, 135, 5);
 			count = playerInfo.coin;
@@ -551,6 +573,7 @@
 			ctx2.fillText("x " + count, 165, 73);
 			
 			ctx2.drawImage(inventory, 220, 5);
+			
 			while(life>0) {
 				if(life>1) {
 					ctx2.drawImage(heart, 37*i + 330, 6);
