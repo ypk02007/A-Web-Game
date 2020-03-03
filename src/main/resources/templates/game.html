@@ -9,21 +9,21 @@
 </head>
 <body>
 
-	<img id="info_heart" width="30" height="30" src="img/info/heart.png">
+	<img id="info_heart" width="20" height="20" src="img/info/heart.png">
 	<img id="info_heart_half" width="30" height="30" src="img/info/heart_half.png">
 	<img id="info_coin" width="20" height="20" src="img/info/coin.png">
 	<img id="info_bomb" width="20" height="20" src="img/info/bomb.png">
 	<img id="info_key" width="20" height="20" src="img/info/key.png">
 	<img id="info_inventory" width="105" height="70" src="img/info/inventory.png">
 
-	<img id="room" width="500" height="400" src="img/bg/room/room.png">
-	<img id="floor" width="380" height="280" src="img/bg/room/control_description.png">
+	<img id="room" width="540" height="420" src="img/bg/room/room.png">
+	<img id="floor" width="420" height="300" src="img/bg/room/control_description.png">
 	<img id="phead" width="80" height="80" src="img/character/gamjeon_head_front.png">
 	<img id="pbody" width="80" height="80" src="img/character/gamjeon_body_front.png">
 	<img id="attack" width="20" height="20" src="img/character/weapon/default.png">
 	
-	<canvas id="info" width="500" height="80"></canvas>
-	<canvas id="canvas" width="500" height="400"></canvas>
+	<canvas id="info" width="540" height="80"></canvas>
+	<canvas id="canvas" width="540" height="420"></canvas>
 	
 	<script th:inline="javascript">
 		/*<![CDATA[*/
@@ -47,9 +47,6 @@
 		var drawInterval;
 		
 		var wall = [10, 60, 40, 40]; // top, bottom, left, right
-		var point = [[${pos}]];
-		var playerX = point[0];
-		var playerY = point[1];
 		var attacks = [];
 		
 		var pressed = [false, false, false, false]; // up, down, left, right
@@ -82,6 +79,13 @@
 			[/]
 			
 			playerInfo = {
+				x: [[${pos[0]}]],
+				y: [[${pos[1]}]],
+				moveBox: {
+					x: 0,
+					y: 0,
+					size: 40
+				},
 				coin: [[${playerInfo.coin}]],
 				bomb: [[${playerInfo.bomb}]],
 				key: [[${playerInfo.key}]],
@@ -93,6 +97,10 @@
 					damage: [[${playerInfo.status.damage}]],
 					speed: [[${playerInfo.status.speed}]],
 					range: [[${playerInfo.status.range}]]
+				},
+				setBoxes: function() {
+					this.moveBox.x = this.x + 20;
+					this.moveBox.y = this.y + 40;
 				}
 			};
 			doorSetting();
@@ -180,13 +188,13 @@
 				var attackObj = {
 					mx: mx,
 					my: my,
-					x: playerX + 30,
-					y: playerY + 30,
-					validCount: 0,
+					x: playerInfo.x + 30,
+					y: playerInfo.y + 30,
+					rangeCount: 0,
 					move: function() {
 						this.x += this.mx;
 						this.y += this.my;
-						this.validCount++;
+						this.rangeCount++;
 					},
 					isValid: function() {
 						if(this.x < wall[2] || this.x > cw - wall[3]) {
@@ -195,7 +203,7 @@
 						} else if(this.y < wall[0] || this.y > ch - wall[1]) {
 							console.log("attack removed by wall top or wall bottom");
 							return false;
-						} else if(this.validCount == playerInfo.status.range) {
+						} else if(this.rangeCount == playerInfo.status.range) {
 							console.log("attack removed because of range limit");
 							return false;
 						} else {
@@ -327,37 +335,44 @@
 		}
 		
 		function playerMove() {
-			if(pressed[0] && (playerY > wall[0])) {
-				playerY -= playerInfo.status.speed;
+			if(pressed[0] && (playerInfo.y > wall[0])) {
+				playerInfo.y -= playerInfo.status.speed;
+				playerInfo.setBoxes();
 			}
-			if(pressed[1] && (playerY < ch-(wall[1]+pbody.height))) {
-				playerY += playerInfo.status.speed;
+			if(pressed[1] && (playerInfo.y < ch-(wall[1]+pbody.height))) {
+				playerInfo.y += playerInfo.status.speed;
+				playerInfo.setBoxes();
 			}
-			if(pressed[2] && (playerX > wall[2])) {
-				playerX -= playerInfo.status.speed;
+			if(pressed[2] && (playerInfo.x > wall[2])) {
+				playerInfo.x -= playerInfo.status.speed;
+				playerInfo.setBoxes();
 			}
-			if(pressed[3] && (playerX < cw-(wall[3]+pbody.width))) {
-				playerX += playerInfo.status.speed;
+			if(pressed[3] && (playerInfo.x < cw-(wall[3]+pbody.width))) {
+				playerInfo.x += playerInfo.status.speed;
+				playerInfo.setBoxes();
 			}
 		}
 		
 		function wallCheck() {
 			var doors = roomInfo[roomNo].doors;
 			
-			if(playerX >= 200 && playerX <= 220 && playerY < (ch/2-pbody.height/2) && doors[0] == 2) {
+			var dx = cw/2 - 30;
+			var dy = ch/2 - 30;
+			
+			if(playerInfo.moveBox.x >= dx && playerInfo.moveBox.x <= dx + 20 && playerInfo.moveBox.y < (ch/2-pbody.height/2) && doors[0] == 2) {
 				wall[0] = -10;
 				wall[1] = 60;
-			} else if(playerX >= 200 && playerX <= 220 && doors[1] == 2) {
+			} else if(playerInfo.moveBox.x >= dx && playerInfo.moveBox.x <= dx + 20 && doors[1] == 2) {
 				wall[0] = 10;
 				wall[1] = 40;
 			} else {
 				wall[0] = 10;
 				wall[1] = 60;
 			}
-			if(playerY >= 150 && playerY <= 170 && playerX < (cw/2-pbody.width/2) && doors[2] == 2) {
+			if(playerInfo.moveBox.y >= dy && playerInfo.moveBox.y <= dy + 20 && playerInfo.moveBox.x < (cw/2-pbody.width/2) && doors[2] == 2) {
 				wall[2] = 20;
 				wall[3] = 40;
-			} else if(playerY >= 150 && playerY <= 170 && doors[3] == 2) {
+			} else if(playerInfo.moveBox.y >= dy && playerInfo.moveBox.y <= dy + 20 && doors[3] == 2) {
 				wall[2] = 40;
 				wall[3] = 20;
 			} else {
@@ -378,8 +393,8 @@
 				ctx.fillStyle = '#C3C3C3';
 				ctx.fillRect(60, 60, floor.width, floor.height);
 			}
-			ctx.drawImage(pbody, playerX, playerY);
-			ctx.drawImage(phead, playerX, playerY);
+			ctx.drawImage(pbody, playerInfo.x, playerInfo.y);
+			ctx.drawImage(phead, playerInfo.x, playerInfo.y);
 		}
 		
 		function drawDoor() {
@@ -394,19 +409,19 @@
 				
 				switch(i) {
 				case 0:
-					dx = 220; dy = 0;
+					dx = cw/2 - 30; dy = 0;
 					deg = 0;
 					break;
 				case 1:
-					dx = 220; dy = ch - door[i].height;
+					dx = cw/2 - 30; dy = ch - 60;
 					deg = 180;
 					break;
 				case 2:
-					dx = 0; dy = 170;
+					dx = 0; dy = ch/2 - 30;
 					deg = 270;
 					break;
 				case 3:
-					dx = cw - door[i].width; dy = 170;
+					dx = cw - 60; dy = ch/2 - 30;
 					deg = 90;
 					break;
 				}
@@ -420,13 +435,13 @@
 		}
 		
 		function doorCheck() {
-			if(playerY == -10) {
+			if(playerInfo.y == -10) {
 				moveRoom(0);
-			} else if(playerY == (ch-(pbody.height+40))) {
+			} else if(playerInfo.y == (ch-(pbody.height+40))) {
 				moveRoom(1);
-			} else if(playerX == 20) {
+			} else if(playerInfo.x == 20) {
 				moveRoom(2);
-			} else if(playerX == (cw-(pbody.width+20))) {
+			} else if(playerInfo.x == (cw-(pbody.width+20))) {
 				moveRoom(3);
 			}
 		}
@@ -464,22 +479,22 @@
 			case 0:
 				sliceX = 0; sliceY = 20;
 				rx = 0; ry = -ch;
-				playerX = 210; playerY = 260;
+				playerInfo.x = cw/2 - pbody.width/2; playerInfo.y = ch - (60 + pbody.height);
 				break;
 			case 1:
 				sliceX = 0; sliceY = -20;
 				rx = 0; ry = ch;
-				playerX = 210; playerY = 10;
+				playerInfo.x = cw/2 + pbody.width/2; playerInfo.y = 60;
 				break;
 			case 2:
 				sliceX = 20; sliceY = 0;
 				rx = -cw; ry = 0;
-				playerX = 360; playerY = 160;
+				playerInfo.x = cw - (60 + pbody.width); playerInfo.y = ch/2 - pbody.height/2;
 				break;
 			case 3:
 				sliceX = -20; sliceY = 0;
 				rx = cw; ry = 0;
-				playerX = 40; playerY = 160;
+				playerInfo.x = 60; playerInfo.y = playerInfo.y = ch/2 - pbody.height/2;
 				break;
 			}
 			
@@ -551,35 +566,35 @@
 			}
 			ctx2.fillStyle = "#000000";
 			
-			ctx2.drawImage(coin, 135, 5);
+			ctx2.drawImage(coin, 165, 5);
 			count = playerInfo.coin;
 			if(count<10) {
 				count = "0"+count;
 			}
-			ctx2.fillText("x " + count, 165, 20);
+			ctx2.fillText("x " + count, 195, 20);
 			
-			ctx2.drawImage(bomb, 135, 30);
+			ctx2.drawImage(bomb, 165, 30);
 			count = playerInfo.bomb;
 			if(count<10) {
 				count = "0"+count;
 			}
-			ctx2.fillText("x " + count, 165, 46);
+			ctx2.fillText("x " + count, 195, 46);
 			
-			ctx2.drawImage(key, 135, 55);
+			ctx2.drawImage(key, 165, 55);
 			count = playerInfo.key;
 			if(count<10) {
 				count = "0"+count;
 			}
-			ctx2.fillText("x " + count, 165, 73);
+			ctx2.fillText("x " + count, 195, 73);
 			
-			ctx2.drawImage(inventory, 220, 5);
+			ctx2.drawImage(inventory, 255, 5);
 			
 			while(life>0) {
 				if(life>1) {
-					ctx2.drawImage(heart, 37*i + 330, 6);
+					ctx2.drawImage(heart, 25*i + 380, 30);
 					life -= 2;
 				} else {
-					ctx2.drawImage(heart_half, 37*i + 330, 6);
+					ctx2.drawImage(heart_half, 25*i + 380, 30);
 					life--;
 				}
 				i++;

@@ -20,7 +20,7 @@ var surprisedFlag = false;
 var playerMoveFlag = false;
 
 var playerX = 246;
-var playerY = 145;
+var playerY = 155;
 var leftX = 77;
 var rightX = 126;
 var lightX = 500;
@@ -70,8 +70,8 @@ function draw() {
 
 function drawStaticImage() {
 	if (!doorMoveFlag) {
-		ctx.drawImage(doorLeft, leftX, 125);
-		ctx.drawImage(doorRight, rightX, 125);
+		ctx.drawImage(doorLeft, leftX, 135);
+		ctx.drawImage(doorRight, rightX, 135);
 	}
 
 	ctx.drawImage(bg, 0, 0);
@@ -79,10 +79,10 @@ function drawStaticImage() {
 	ctx.drawImage(phead, playerX, playerY);
 
 	if (zzzFlag) {
-		ctx.drawImage(zzz, 261, 115);
+		ctx.drawImage(zzz, 261, 125);
 	}
 	if (confusedFlag) {
-		ctx.drawImage(confused, 261, 115);
+		ctx.drawImage(confused, 261, 125);
 	}
 	if (surprisedFlag) {
 		ctx.drawImage(surprised, playerX + 15, playerY - 30);
@@ -100,7 +100,7 @@ function drawTunnelLight() {
 		zzzFlag = true;
 	}
 
-	ctx.drawImage(tunnelLight, lightX, 130);
+	ctx.drawImage(tunnelLight, lightX, 140);
 }
 
 function doorMove() {
@@ -109,8 +109,8 @@ function doorMove() {
 
 	doorChk++;
 
-	ctx.drawImage(doorLeft, leftX, 125);
-	ctx.drawImage(doorRight, rightX, 125);
+	ctx.drawImage(doorLeft, leftX, 135);
+	ctx.drawImage(doorRight, rightX, 135);
 
 	if (doorChk > 7) {
 		doorMoveFlag = false;
@@ -143,7 +143,7 @@ function playerMove() {
 		phead.src = "img/character/gamjeon_head_left.png";
 		pbody.src = "img/character/gamjeon_body_left.png";
 		playerX -= 5;
-	} else if(playerY > 115) {
+	} else if(playerY > 125) {
 		phead.src = "img/character/gamjeon_head_back.png";
 		pbody.src = "img/character/gamjeon_body_back.png";
 		playerY -= 5;
