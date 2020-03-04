@@ -36,6 +36,7 @@
 
 		var room = document.getElementById("room");
 		var door = [null, null, null, null];
+		var obstacle = [];
 		var floor = document.getElementById("floor");
 		var phead = document.getElementById("phead");
 		var pbody = document.getElementById("pbody");
@@ -46,7 +47,7 @@
 		var playerInfo;
 		var drawInterval;
 		
-		var wall = [10, 60, 40, 40]; // top, bottom, left, right
+		var wall = [60, 60, 60, 60]; // top, bottom, left, right
 		var attacks = [];
 		
 		var pressed = [false, false, false, false]; // up, down, left, right
@@ -73,7 +74,8 @@
 					doors: [[${infoInit.doors}]],
 					linked: [[${infoInit.linked}]],
 					visited: [[${infoInit.visited}]],
-					map: [[${infoInit.map}]]
+					map: [[${infoInit.map}]],
+					obstacles: [[${infoInit.obstacles}]]
 				};
 				roomInfo.push(roomInfoInit);	
 			[/]
@@ -83,8 +85,7 @@
 				y: [[${pos[1]}]],
 				moveBox: {
 					x: 0,
-					y: 0,
-					size: 40
+					y: 0
 				},
 				coin: [[${playerInfo.coin}]],
 				bomb: [[${playerInfo.bomb}]],
@@ -103,7 +104,10 @@
 					this.moveBox.y = this.y + 40;
 				}
 			};
+			
+			playerInfo.setBoxes();
 			doorSetting();
+			obstacleSetting();
 			setInterval(drawInfo, 20);
 			drawInterval = setInterval(draw, 20);
 		}
@@ -131,36 +135,23 @@
 			}
 		}
 		
-		function keyDown(e) {
-			var key = e.keyCode;
-			
-			if(!controlFlag) {
-				return;
+		function obstacleSetting() {
+			if(obstacle.length > 0) {
+				obstacle.splice(0, obstacle.length);
 			}
 			
-			if(key==87) {
-				pressed[0] = true;
-			} else if(key==83) {
-				pressed[1] = true;
-			}
+			var obstacles = roomInfo[roomNo].obstacles;
 			
-			if(key==65) {
-				pressed[2] = true;
-			} else if(key==68) {
-				pressed[3] = true;
-			}
-			
-			if(key==38) {
-				attackSetting(1);
-			}
-			if(key==40) {
-				attackSetting(2);
-			}
-			if(key==37) {
-				attackSetting(3);
-			}
-			if(key==39) {
-				attackSetting(4);
+			for(var i = 0; i < obstacles.length; i++) {
+				var obstacleImg = document.createElement("img");
+				obstacleImg.setAttribute("width", "60");
+				obstacleImg.setAttribute("height", "60");
+				
+				if(obstacles[i][2] == 1) {
+					obstacleImg.setAttribute("src", "img/sprite/stone.png");
+				}
+
+				obstacle.push(obstacleImg);
 			}
 		}
 		
@@ -172,16 +163,16 @@
 				var my = 0;
 				var md = 10;
 				switch(dir) {
-				case 1:
+				case 0:
 					my = -md;
 					break;
-				case 2:
+				case 1:
 					my = md;
 					break;
-				case 3:
+				case 2:
 					mx = -md;
 					break;
-				case 4:
+				case 3:
 					mx = md;
 					break;
 				}
@@ -218,6 +209,39 @@
 				}, 250);
 			}
 		}
+		
+		function keyDown(e) {
+			var key = e.keyCode;
+			
+			if(!controlFlag) {
+				return;
+			}
+			
+			if(key==87) {
+				pressed[0] = true;
+			} else if(key==83) {
+				pressed[1] = true;
+			}
+			
+			if(key==65) {
+				pressed[2] = true;
+			} else if(key==68) {
+				pressed[3] = true;
+			}
+			
+			if(key==38) {
+				attackSetting(0);
+			}
+			if(key==40) {
+				attackSetting(1);
+			}
+			if(key==37) {
+				attackSetting(2);
+			}
+			if(key==39) {
+				attackSetting(3);
+			}
+		}
 
 		function keyUp(e) {
 			var key = e.keyCode;
@@ -232,38 +256,6 @@
 				pressed[2] = false;
 			} else if(key==68) {
 				pressed[3] = false;
-			}
-		}
-		
-		function directionCheck() {
-			if(pressed[0]) {
-				directionCode = 0;
-				if(pressed[3]) {
-					directionCode = 1;
-				} else if(pressed[2]) {
-					directionCode = 7;
-				}
-			} else if(pressed[1]) {
-				directionCode = 4;
-				if(pressed[2]) {
-					directionCode = 5;
-				} else if(pressed[3]) {
-					directionCode = 3;
-				}
-			} else if(pressed[2]) {
-				directionCode = 6;
-				if(pressed[0]) {
-					directionCode = 7;
-				} else if(pressed[1]) {
-					directionCode = 5;
-				}
-			} else if(pressed[3]) {
-				directionCode = 2;
-				if(pressed[0]) {
-					directionCode = 1;
-				} else if(pressed[1]) {
-					directionCode = 3;
-				}
 			}
 		}
 	
@@ -319,37 +311,66 @@
 			return src;
 		}
 		
-		function drawAttack() {
-			var remove = [];
-			for(var i = 0; i < attacks.length; i++) {
-				if(attacks[i].isValid()) {
-					attacks[i].move();
-					ctx.drawImage(attack, attacks[i].x, attacks[i].y);
-				} else {
-					remove.push(i);
-				}
-			}
-			for(var i = remove.length; i > 0; i--) {
-				attacks.splice(remove[i-1], 1);
-			}
-		}
-		
 		function playerMove() {
-			if(pressed[0] && (playerInfo.y > wall[0])) {
+			if(pressed[0] && (playerInfo.moveBox.y > wall[0]) && obstacleCheck(0)) {
 				playerInfo.y -= playerInfo.status.speed;
 				playerInfo.setBoxes();
 			}
-			if(pressed[1] && (playerInfo.y < ch-(wall[1]+pbody.height))) {
+			if(pressed[1] && (playerInfo.moveBox.y < ch-(wall[1]+40)) && obstacleCheck(1)) {
 				playerInfo.y += playerInfo.status.speed;
 				playerInfo.setBoxes();
 			}
-			if(pressed[2] && (playerInfo.x > wall[2])) {
+			if(pressed[2] && (playerInfo.moveBox.x > wall[2]) && obstacleCheck(2)) {
 				playerInfo.x -= playerInfo.status.speed;
 				playerInfo.setBoxes();
 			}
-			if(pressed[3] && (playerInfo.x < cw-(wall[3]+pbody.width))) {
+			if(pressed[3] && (playerInfo.moveBox.x < cw-(wall[3]+40)) && obstacleCheck(3)) {
 				playerInfo.x += playerInfo.status.speed;
 				playerInfo.setBoxes();
+			}
+		}
+		
+		function directionCheck() {
+			if(pressed[0]) {
+				directionCode = 0;
+				if(pressed[3]) {
+					directionCode = 1;
+				} else if(pressed[2]) {
+					directionCode = 7;
+				}
+			} else if(pressed[1]) {
+				directionCode = 4;
+				if(pressed[2]) {
+					directionCode = 5;
+				} else if(pressed[3]) {
+					directionCode = 3;
+				}
+			} else if(pressed[2]) {
+				directionCode = 6;
+				if(pressed[0]) {
+					directionCode = 7;
+				} else if(pressed[1]) {
+					directionCode = 5;
+				}
+			} else if(pressed[3]) {
+				directionCode = 2;
+				if(pressed[0]) {
+					directionCode = 1;
+				} else if(pressed[1]) {
+					directionCode = 3;
+				}
+			}
+		}
+		
+		function doorCheck() {
+			if(playerInfo.moveBox.y == 40) {
+				moveRoom(0);
+			} else if(playerInfo.moveBox.y == (ch-(40+40))) {
+				moveRoom(1);
+			} else if(playerInfo.moveBox.x == 40) {
+				moveRoom(2);
+			} else if(playerInfo.moveBox.x == (cw-(40+40))) {
+				moveRoom(3);
 			}
 		}
 		
@@ -360,25 +381,60 @@
 			var dy = ch/2 - 30;
 			
 			if(playerInfo.moveBox.x >= dx && playerInfo.moveBox.x <= dx + 20 && playerInfo.moveBox.y < (ch/2-pbody.height/2) && doors[0] == 2) {
-				wall[0] = -10;
+				wall[0] = 40;
 				wall[1] = 60;
 			} else if(playerInfo.moveBox.x >= dx && playerInfo.moveBox.x <= dx + 20 && doors[1] == 2) {
-				wall[0] = 10;
+				wall[0] = 60;
 				wall[1] = 40;
 			} else {
-				wall[0] = 10;
+				wall[0] = 60;
 				wall[1] = 60;
 			}
 			if(playerInfo.moveBox.y >= dy && playerInfo.moveBox.y <= dy + 20 && playerInfo.moveBox.x < (cw/2-pbody.width/2) && doors[2] == 2) {
-				wall[2] = 20;
-				wall[3] = 40;
+				wall[2] = 40;
+				wall[3] = 60;
 			} else if(playerInfo.moveBox.y >= dy && playerInfo.moveBox.y <= dy + 20 && doors[3] == 2) {
-				wall[2] = 40;
-				wall[3] = 20;
-			} else {
-				wall[2] = 40;
+				wall[2] = 60;
 				wall[3] = 40;
+			} else {
+				wall[2] = 60;
+				wall[3] = 60;
 			}
+		}
+		
+		function obstacleCheck(dir) {
+			var mx = playerInfo.moveBox.x + 20;
+			var my = playerInfo.moveBox.y + 20;
+			var ox;
+			var oy;
+			for(var i = 0; i < obstacle.length; i++) {
+				ox = roomInfo[roomNo].obstacles[i][0] * 60 + 60 + 30;
+				oy = roomInfo[roomNo].obstacles[i][1] * 60 + 60 + 30;
+				
+				switch(dir) {
+				case 0:
+					if(mx < ox + 50 && mx > ox - 50 && my == oy + 50) {
+						return false;
+					}
+					break;
+				case 1:
+					if(mx < ox + 50 && mx > ox - 50 && my == oy - 50) {
+						return false;
+					}
+					break;
+				case 2:
+					if(my < oy + 50 && my > oy - 50 && mx == ox + 50) {
+						return false;
+					}
+					break;
+				case 3:
+					if(my < oy + 50 && my > oy - 50 && mx == ox - 50) {
+						return false;
+					}
+					break;
+				}
+			}
+			return true;
 		}
 		
 		function drawImage() {
@@ -393,8 +449,24 @@
 				ctx.fillStyle = '#C3C3C3';
 				ctx.fillRect(60, 60, floor.width, floor.height);
 			}
+			drawObstacle();
 			ctx.drawImage(pbody, playerInfo.x, playerInfo.y);
 			ctx.drawImage(phead, playerInfo.x, playerInfo.y);
+		}
+		
+		function drawAttack() {
+			var remove = [];
+			for(var i = 0; i < attacks.length; i++) {
+				if(attacks[i].isValid()) {
+					attacks[i].move();
+					ctx.drawImage(attack, attacks[i].x, attacks[i].y);
+				} else {
+					remove.push(i);
+				}
+			}
+			for(var i = remove.length; i > 0; i--) {
+				attacks.splice(remove[i-1], 1);
+			}
 		}
 		
 		function drawDoor() {
@@ -434,15 +506,9 @@
 			}
 		}
 		
-		function doorCheck() {
-			if(playerInfo.y == -10) {
-				moveRoom(0);
-			} else if(playerInfo.y == (ch-(pbody.height+40))) {
-				moveRoom(1);
-			} else if(playerInfo.x == 20) {
-				moveRoom(2);
-			} else if(playerInfo.x == (cw-(pbody.width+20))) {
-				moveRoom(3);
+		function drawObstacle() {
+			for(var i = 0; i < obstacle.length; i++) {
+				ctx.drawImage(obstacle[i], roomInfo[roomNo].obstacles[i][0] * 60 + 60, roomInfo[roomNo].obstacles[i][1] * 60 + 60);
 			}
 		}
 		
@@ -474,6 +540,7 @@
 				}
 			}
 			doorSetting();
+			obstacleSetting();
 			
 			switch(dir) {
 			case 0:
@@ -497,6 +564,8 @@
 				playerInfo.x = 60; playerInfo.y = playerInfo.y = ch/2 - pbody.height/2;
 				break;
 			}
+			
+			playerInfo.setBoxes();
 			
 			ctx.fillStyle = '#C3C3C3';
 			
@@ -526,9 +595,7 @@
 			
 			directionCheck();
 			
-			if(attacks.length > 0) {
-				drawAttack();
-			}
+			drawAttack();
 			
 			wallCheck();
 			
