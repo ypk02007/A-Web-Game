@@ -53,7 +53,7 @@
 		var pressed = [false, false, false, false]; // up, down, left, right
 		
 		var directionCode = 4;
-		var attackDirection = 2;
+		var attackDirection = 1;
 		
 		var controlFlag = true;
 		var attackFlag = true;
@@ -147,8 +147,13 @@
 				obstacleImg.setAttribute("width", "60");
 				obstacleImg.setAttribute("height", "60");
 				
-				if(obstacles[i][2] == 1) {
+				switch(obstacles[i][2]) {
+				case 1:
 					obstacleImg.setAttribute("src", "img/sprite/stone.png");
+					break;
+				case 2:
+					obstacleImg.setAttribute("src", "img/sprite/pit.png");
+					break;
 				}
 
 				obstacle.push(obstacleImg);
@@ -158,6 +163,8 @@
 		function attackSetting(dir) {
 			if(attackFlag) {
 				attackFlag = false;
+				
+				attackDirection = dir;
 				
 				var mx = 0;
 				var my = 0;
@@ -179,6 +186,7 @@
 				var attackObj = {
 					mx: mx,
 					my: my,
+					dir: dir,
 					x: playerInfo.x + 30,
 					y: playerInfo.y + 30,
 					rangeCount: 0,
@@ -188,7 +196,10 @@
 						this.rangeCount++;
 					},
 					isValid: function() {
-						if(this.x < wall[2] || this.x > cw - wall[3]) {
+						if(!obstacleAttackCheck(this.dir, this.x, this.y, 20)) {
+							console.log("attack removed by obstacle");
+							return false;
+						} else if(this.x < wall[2] || this.x > cw - wall[3]) {
 							console.log("attack removed by wall left or wall right");
 							return false;
 						} else if(this.y < wall[0] || this.y > ch - wall[1]) {
@@ -295,16 +306,16 @@
 		function setPlayerHead() {
 			var src;
 			switch(attackDirection) {
-			case 1:
+			case 0:
 				src = "img/character/gamjeon_head_back.png";
 				break;
-			case 2:
+			case 1:
 				src = "img/character/gamjeon_head_front.png";
 				break;
-			case 3:
+			case 2:
 				src = "img/character/gamjeon_head_left.png";
 				break;
-			case 4:
+			case 3:
 				src = "img/character/gamjeon_head_right.png";
 				break;
 			}
@@ -429,6 +440,44 @@
 					break;
 				case 3:
 					if(my < oy + 50 && my > oy - 50 && mx == ox - 50) {
+						return false;
+					}
+					break;
+				}
+			}
+			return true;
+		}
+		
+		function obstacleAttackCheck(dir, x, y, size) {
+			var mx = x + size/2;
+			var my = y + size/2;
+			var ox;
+			var oy;
+			for(var i = 0; i < obstacle.length; i++) {
+				if(roomInfo[roomNo].obstacles[i][2] == 2) {
+					continue;
+				}
+				ox = roomInfo[roomNo].obstacles[i][0] * 60 + 60 + 30;
+				oy = roomInfo[roomNo].obstacles[i][1] * 60 + 60 + 30;
+				
+				switch(dir) {
+				case 0:
+					if(mx < ox + 50 && mx > ox - 50 && my <= oy + 50) {
+						return false;
+					}
+					break;
+				case 1:
+					if(mx < ox + 50 && mx > ox - 50 && my >= oy - 50) {
+						return false;
+					}
+					break;
+				case 2:
+					if(my < oy + 50 && my > oy - 50 && mx <= ox + 50) {
+						return false;
+					}
+					break;
+				case 3:
+					if(my < oy + 50 && my > oy - 50 && mx >= ox - 50) {
 						return false;
 					}
 					break;
@@ -655,6 +704,8 @@
 			ctx2.fillText("x " + count, 195, 73);
 			
 			ctx2.drawImage(inventory, 255, 5);
+			
+			ctx2.fillText("LIFE", 430, 25);
 			
 			while(life>0) {
 				if(life>1) {

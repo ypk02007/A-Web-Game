@@ -85,12 +85,12 @@ public class StageService {
 		return roomInfo;
 	}
 	
-	private int[][] setObstacles(int stage, int roomNo) {
+	private int[][] setObstacles(int stage, int roomNo) { // x, y, code
 		if(stage == 1 && roomNo == 1) {
 			int[][] obstacles = {{0, 0, 1}, {3, 3, 1}};
 			return obstacles;
 		} else if(stage == 1 && roomNo == 5) {
-			int[][] obstacles = {{2, 2, 1}, {3, 3, 1}, {2, 4, 1}};
+			int[][] obstacles = {{2, 2, 1}, {3, 3, 2}, {2, 4, 1}};
 			return obstacles;
 		} else {
 			int[][] obstacles = {};
