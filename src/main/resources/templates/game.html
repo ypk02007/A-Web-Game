@@ -21,6 +21,7 @@
 	<img id="phead" width="80" height="80" src="img/character/gamjeon_head_front.png">
 	<img id="pbody" width="80" height="80" src="img/character/gamjeon_body_front.png">
 	<img id="attack" width="20" height="20" src="img/character/weapon/default.png">
+	<img id="bomb" width="40" height="40" src="img/sprite/bomb.png">
 	
 	<canvas id="info" width="540" height="80"></canvas>
 	<canvas id="canvas" width="540" height="420"></canvas>
@@ -41,10 +42,13 @@
 		var phead = document.getElementById("phead");
 		var pbody = document.getElementById("pbody");
 		var attack = document.getElementById("attack");
+		var bomb = document.getElementById("bomb");
 		
 		var roomInfo = [];
 		var roomNo;
 		var playerInfo;
+		var bombInfo;
+		
 		var drawInterval;
 		
 		var wall = [60, 60, 60, 60]; // top, bottom, left, right
@@ -57,6 +61,7 @@
 		
 		var controlFlag = true;
 		var attackFlag = true;
+		var bombFlag = true;
 		
 		var roomNo = 0;
 		
@@ -221,6 +226,20 @@
 			}
 		}
 		
+		function bombSetting(x, y) {
+			if(bombFlag) {
+				bombFlag = false;
+				var bombInfoInit = {
+					x: x,
+					y: y,
+					size: 40,
+					count: 0
+				};
+				bombInfo = bombInfoInit;
+				console.log("bomb start");
+			}
+		}
+		
 		function keyDown(e) {
 			var key = e.keyCode;
 			
@@ -251,6 +270,10 @@
 			}
 			if(key==39) {
 				attackSetting(3);
+			}
+			
+			if(key==67 || key==16) {
+				bombSetting(playerInfo.moveBox.x, playerInfo.moveBox.y);
 			}
 		}
 
@@ -499,6 +522,11 @@
 				ctx.fillRect(60, 60, floor.width, floor.height);
 			}
 			drawObstacle();
+			
+			if(!bombFlag) {
+				drawBomb();
+			}
+			
 			ctx.drawImage(pbody, playerInfo.x, playerInfo.y);
 			ctx.drawImage(phead, playerInfo.x, playerInfo.y);
 		}
@@ -558,6 +586,33 @@
 		function drawObstacle() {
 			for(var i = 0; i < obstacle.length; i++) {
 				ctx.drawImage(obstacle[i], roomInfo[roomNo].obstacles[i][0] * 60 + 60, roomInfo[roomNo].obstacles[i][1] * 60 + 60);
+			}
+		}
+		
+		function drawBomb() {
+			if(bombInfo.count < 50 && bombInfo.count%5 == 0 && bombInfo.count%10 == 0) {
+				bomb.src = "img/sprite/bomb_ignited.png";
+			} else if(bombInfo.count < 50 && bombInfo.count%5 == 0 && bombInfo.count%10 != 0) {
+				bomb.src = "img/sprite/bomb.png";
+			} else if(bombInfo.count >= 50 && bombInfo.count < 70 && bombInfo.count%5 == 0 && bombInfo.count%10 == 0) {
+				bomb.src = "img/sprite/explosion_0.png";
+			} else if(bombInfo.count >= 50 && bombInfo.count < 70 && bombInfo.count%5 == 0 && bombInfo.count%10 != 0) {
+				bomb.src = "img/sprite/explosion_1.png";
+			} else if(bombInfo.count == 70) {
+				bombFlag = true;
+				console.log("bomb end");
+				return;
+			}
+			
+			ctx.drawImage(bomb, bombInfo.x, bombInfo.y, bombInfo.size, bombInfo.size);
+			
+			bombInfo.count++;
+			if(bombInfo.count == 50) {
+				bomb.width = "220";
+				bomb.height = "220";
+				bombInfo.size = 220;
+				bombInfo.x -= 90;
+				bombInfo.y -= 90;
 			}
 		}
 		
