@@ -21,7 +21,7 @@
 	<img id="phead" width="80" height="80" src="img/character/gamjeon_head_front.png">
 	<img id="pbody" width="80" height="80" src="img/character/gamjeon_body_front.png">
 	<img id="attack" width="20" height="20" src="img/character/weapon/default.png">
-	<img id="bomb" width="40" height="40" src="img/sprite/bomb.png">
+	<img id="bomb" width="40" height="40" src="img/sprite/bomb_ignited_0.png">
 	
 	<canvas id="info" width="540" height="80"></canvas>
 	<canvas id="canvas" width="540" height="420"></canvas>
@@ -154,10 +154,13 @@
 				
 				switch(obstacles[i][2]) {
 				case 1:
-					obstacleImg.setAttribute("src", "img/sprite/stone.png");
+					obstacleImg.setAttribute("src", "img/bg/room/stone.png");
 					break;
 				case 2:
-					obstacleImg.setAttribute("src", "img/sprite/pit.png");
+					obstacleImg.setAttribute("src", "img/bg/room/pit_edge.png");
+					break;
+				case 3:
+					obstacleImg.setAttribute("src", "img/bg/room/stone_was_here.png");
 					break;
 				}
 
@@ -227,12 +230,12 @@
 		}
 		
 		function bombSetting(x, y) {
-			if(bombFlag) {
+			if(bombFlag && playerInfo.bomb > 0) {
 				bombFlag = false;
+				playerInfo.bomb--;
 				var bombInfoInit = {
 					x: x,
 					y: y,
-					size: 40,
 					count: 0
 				};
 				bombInfo = bombInfoInit;
@@ -442,6 +445,9 @@
 			var ox;
 			var oy;
 			for(var i = 0; i < obstacle.length; i++) {
+				if(roomInfo[roomNo].obstacles[i][2] == 3) {
+					continue;
+				}
 				ox = roomInfo[roomNo].obstacles[i][0] * 60 + 60 + 30;
 				oy = roomInfo[roomNo].obstacles[i][1] * 60 + 60 + 30;
 				
@@ -477,7 +483,7 @@
 			var ox;
 			var oy;
 			for(var i = 0; i < obstacle.length; i++) {
-				if(roomInfo[roomNo].obstacles[i][2] == 2) {
+				if(roomInfo[roomNo].obstacles[i][2] != 1) {
 					continue;
 				}
 				ox = roomInfo[roomNo].obstacles[i][0] * 60 + 60 + 30;
@@ -485,28 +491,48 @@
 				
 				switch(dir) {
 				case 0:
-					if(mx < ox + 50 && mx > ox - 50 && my <= oy + 50) {
+					if(mx < ox + 40 && mx > ox - 40 && my <= oy + 40) {
 						return false;
 					}
 					break;
 				case 1:
-					if(mx < ox + 50 && mx > ox - 50 && my >= oy - 50) {
+					if(mx < ox + 40 && mx > ox - 40 && my >= oy - 40) {
 						return false;
 					}
 					break;
 				case 2:
-					if(my < oy + 50 && my > oy - 50 && mx <= ox + 50) {
+					if(my < oy + 40 && my > oy - 40 && mx <= ox + 40) {
 						return false;
 					}
 					break;
 				case 3:
-					if(my < oy + 50 && my > oy - 50 && mx >= ox - 50) {
+					if(my < oy + 40 && my > oy - 40 && mx >= ox - 40) {
 						return false;
 					}
 					break;
 				}
 			}
 			return true;
+		}
+		
+		function obstacleDestroyCheck() {
+			var mx = bombInfo.x + bomb.width/2;
+			var my = bombInfo.y + bomb.height/2;
+			var ox;
+			var oy;
+			for(var i = 0; i < obstacle.length; i++) {
+				if(roomInfo[roomNo].obstacles[i][2] != 1) {
+					continue;
+				}
+				ox = roomInfo[roomNo].obstacles[i][0] * 60 + 60 + 30;
+				oy = roomInfo[roomNo].obstacles[i][1] * 60 + 60 + 30;
+				
+				if(Math.abs(mx-ox) < (bomb.width + 60)/2 && Math.abs(my-oy) < (bomb.height + 60)/2) {
+					roomInfo[roomNo].obstacles[i][2] = 3;
+					obstacle[i].src = "img/bg/room/stone_was_here.png";
+				}
+				
+			}
 		}
 		
 		function drawImage() {
@@ -591,29 +617,29 @@
 		
 		function drawBomb() {
 			if(bombInfo.count < 50 && bombInfo.count%5 == 0 && bombInfo.count%10 == 0) {
-				bomb.src = "img/sprite/bomb_ignited.png";
+				bomb.src = "img/sprite/bomb_ignited_0.png";
 			} else if(bombInfo.count < 50 && bombInfo.count%5 == 0 && bombInfo.count%10 != 0) {
-				bomb.src = "img/sprite/bomb.png";
-			} else if(bombInfo.count >= 50 && bombInfo.count < 70 && bombInfo.count%5 == 0 && bombInfo.count%10 == 0) {
+				bomb.src = "img/sprite/bomb_ignited_1.png";
+			} else if(bombInfo.count == 50) {
+				bomb.width = "160";
+				bomb.height = "160";
+				bombInfo.x -= 60;
+				bombInfo.y -= 60;
+				obstacleDestroyCheck();
 				bomb.src = "img/sprite/explosion_0.png";
-			} else if(bombInfo.count >= 50 && bombInfo.count < 70 && bombInfo.count%5 == 0 && bombInfo.count%10 != 0) {
+			} else if(bombInfo.count == 55) {
 				bomb.src = "img/sprite/explosion_1.png";
-			} else if(bombInfo.count == 70) {
+			} else if(bombInfo.count == 60) {
+				bomb.width = "40";
+				bomb.height = "40";
 				bombFlag = true;
 				console.log("bomb end");
 				return;
 			}
 			
-			ctx.drawImage(bomb, bombInfo.x, bombInfo.y, bombInfo.size, bombInfo.size);
+			ctx.drawImage(bomb, bombInfo.x, bombInfo.y, bomb.width, bomb.height);
 			
 			bombInfo.count++;
-			if(bombInfo.count == 50) {
-				bomb.width = "220";
-				bomb.height = "220";
-				bombInfo.size = 220;
-				bombInfo.x -= 90;
-				bombInfo.y -= 90;
-			}
 		}
 		
 		function moveRoom(dir) {
