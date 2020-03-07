@@ -65,6 +65,8 @@
 		
 		var roomNo = 0;
 		
+		var monsterTest;
+		
 		document.addEventListener("keydown", keyDown, false);
 		document.addEventListener("keyup", keyUp, false);
 		
@@ -716,6 +718,33 @@
 					controlFlag = true;
 				}
 			}, 20);
+		}
+		
+		function monsterTest() {
+			var img = document.createElement("img");
+			img.setAttribute("width", "60");
+			img.setAttribute("height", "60");
+			img.setAttribute("src", "img/monster/knuckles_0");
+			var monster = {
+				x: 180,
+				y: 120,
+				dirX: 0,
+				dirY: 0,
+				img: img,
+				changeDirCount: 0,
+				move: function() {
+					if(playerInfo.x > this.x) {
+						dirX = 3;
+					} else if(playerInfo.x < this.x) {
+						dirX = 2;
+					}
+					if(playerInfo.y > this.y) {
+						dirY = 1;
+					} else if(playerInfo.y < this.y) {
+						dirX = 0;
+					}
+				}
+			};
 		}
 		
 		function draw() {
