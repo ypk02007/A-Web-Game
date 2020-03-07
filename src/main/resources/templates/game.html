@@ -65,7 +65,7 @@
 		
 		var roomNo = 0;
 		
-		var monsterTest;
+		var monsterTest = null;
 		
 		document.addEventListener("keydown", keyDown, false);
 		document.addEventListener("keyup", keyUp, false);
@@ -351,19 +351,19 @@
 		}
 		
 		function playerMove() {
-			if(pressed[0] && (playerInfo.moveBox.y > wall[0]) && obstacleCheck(0)) {
+			if(pressed[0] && (playerInfo.moveBox.y > wall[0]) && obstacleCheck(0, playerInfo.moveBox.x, playerInfo.moveBox.y, 40, 40)) {
 				playerInfo.y -= playerInfo.status.speed;
 				playerInfo.setBoxes();
 			}
-			if(pressed[1] && (playerInfo.moveBox.y < ch-(wall[1]+40)) && obstacleCheck(1)) {
+			if(pressed[1] && (playerInfo.moveBox.y < ch-(wall[1]+40)) && obstacleCheck(1, playerInfo.moveBox.x, playerInfo.moveBox.y, 40, 40)) {
 				playerInfo.y += playerInfo.status.speed;
 				playerInfo.setBoxes();
 			}
-			if(pressed[2] && (playerInfo.moveBox.x > wall[2]) && obstacleCheck(2)) {
+			if(pressed[2] && (playerInfo.moveBox.x > wall[2]) && obstacleCheck(2, playerInfo.moveBox.x, playerInfo.moveBox.y, 40, 40)) {
 				playerInfo.x -= playerInfo.status.speed;
 				playerInfo.setBoxes();
 			}
-			if(pressed[3] && (playerInfo.moveBox.x < cw-(wall[3]+40)) && obstacleCheck(3)) {
+			if(pressed[3] && (playerInfo.moveBox.x < cw-(wall[3]+40)) && obstacleCheck(3, playerInfo.moveBox.x, playerInfo.moveBox.y, 40, 40)) {
 				playerInfo.x += playerInfo.status.speed;
 				playerInfo.setBoxes();
 			}
@@ -441,9 +441,11 @@
 			}
 		}
 		
-		function obstacleCheck(dir) {
-			var mx = playerInfo.moveBox.x + 20;
-			var my = playerInfo.moveBox.y + 20;
+		function obstacleCheck(dir, x, y, width, height) {
+			var mx = x + width/2;
+			var my = y + height/2;
+			var boundX = 30 + width/2;
+			var boundY = 30 + height/2;
 			var ox;
 			var oy;
 			for(var i = 0; i < obstacle.length; i++) {
@@ -455,22 +457,62 @@
 				
 				switch(dir) {
 				case 0:
-					if(mx < ox + 50 && mx > ox - 50 && my == oy + 50) {
+					if(mx < ox + boundX && mx > ox - boundX && my == oy + boundY) {
 						return false;
 					}
 					break;
 				case 1:
-					if(mx < ox + 50 && mx > ox - 50 && my == oy - 50) {
+					if(mx < ox + boundX && mx > ox - boundX && my == oy - boundY) {
 						return false;
 					}
 					break;
 				case 2:
-					if(my < oy + 50 && my > oy - 50 && mx == ox + 50) {
+					if(my < oy + boundY && my > oy - boundY && mx == ox + boundX) {
 						return false;
 					}
 					break;
 				case 3:
-					if(my < oy + 50 && my > oy - 50 && mx == ox - 50) {
+					if(my < oy + boundY && my > oy - boundY && mx == ox - boundX) {
+						return false;
+					}
+					break;
+				}
+			}
+			return true;
+		}
+		
+		function obstacleMonsterCheck(dir, x, y, width, height) {
+			var mx = x + width/2;
+			var my = y + height/2;
+			var boundX = 30 + width/2;
+			var boundY = 30 + height/2;
+			var ox;
+			var oy;
+			for(var i = 0; i < obstacle.length; i++) {
+				if(roomInfo[roomNo].obstacles[i][2] == 3) {
+					continue;
+				}
+				ox = roomInfo[roomNo].obstacles[i][0] * 60 + 60 + 30;
+				oy = roomInfo[roomNo].obstacles[i][1] * 60 + 60 + 30;
+				
+				switch(dir) {
+				case 0:
+					if(mx < ox + boundX && mx > ox - boundX && my <= oy + boundY) {
+						return false;
+					}
+					break;
+				case 1:
+					if(mx < ox + boundX && mx > ox - boundX && my >= oy - boundY) {
+						return false;
+					}
+					break;
+				case 2:
+					if(my < oy + boundY && my > oy - boundY && mx <= ox + boundX) {
+						return false;
+					}
+					break;
+				case 3:
+					if(my < oy + boundY && my > oy - boundY && mx >= ox - boundX) {
 						return false;
 					}
 					break;
@@ -639,7 +681,7 @@
 				return;
 			}
 			
-			ctx.drawImage(bomb, bombInfo.x, bombInfo.y, bomb.width, bomb.height);
+			ctx.drawImage(bomb, bombInfo.x, bombInfo.y);
 			
 			bombInfo.count++;
 		}
@@ -715,36 +757,79 @@
 				if(rx == 0 && ry == 0) {
 					clearInterval(interval);
 					drawInterval = setInterval(draw, 20);
+					if(roomNo == 1) {
+						monsterTestSetting();
+					} else {
+						monsterTest = null;
+					}
 					controlFlag = true;
 				}
 			}, 20);
 		}
 		
-		function monsterTest() {
+		function monsterTestSetting() {
 			var img = document.createElement("img");
 			img.setAttribute("width", "60");
 			img.setAttribute("height", "60");
-			img.setAttribute("src", "img/monster/knuckles_0");
+			img.setAttribute("src", "img/monster/knuckles_0.png");
 			var monster = {
 				x: 180,
 				y: 120,
 				dirX: 0,
 				dirY: 0,
 				img: img,
+				srcCode: 0,
 				changeDirCount: 0,
 				move: function() {
 					if(playerInfo.x > this.x) {
-						dirX = 3;
-					} else if(playerInfo.x < this.x) {
-						dirX = 2;
+						this.dirX = 3;
+						if(obstacleMonsterCheck(this.dirX, this.x + 10, this.y + 20, 40, 40)) {
+							this.x += 2;
+						}
+					} else {
+						this.dirX = 2;
+						if(obstacleMonsterCheck(this.dirX, this.x + 10, this.y + 20, 40, 40)) {
+							this.x -= 2;
+						}
 					}
 					if(playerInfo.y > this.y) {
-						dirY = 1;
-					} else if(playerInfo.y < this.y) {
-						dirX = 0;
+						this.dirY = 1;
+						if(obstacleMonsterCheck(this.dirY, this.x + 10, this.y + 20, 40, 40)) {
+							this.y += 2;
+						}
+					} else {
+						this.dirX = 0;
+						if(obstacleMonsterCheck(this.dirY, this.x + 10, this.y + 20, 40, 40)) {
+							this.y -= 2;
+						}
+					}
+				},
+				changeImage: function() {
+					this.changeDirCount++;
+					if(this.changeDirCount == 8) {
+						this.srcCode++;
+						if(this.srcCode > 1) {
+							this.srcCode = 0;
+						}
+						switch(this.srcCode) {
+						case 0:
+							this.img.src = "img/monster/knuckles_0.png"; break;
+						case 1:
+							this.img.src = "img/monster/knuckles_1.png"; break;
+						}
+						this.changeDirCount = 0;
 					}
 				}
 			};
+			monsterTest = monster;
+		}
+		
+		function drawMonsterTest() {
+			if(monsterTest != null) {
+				monsterTest.move();
+				monsterTest.changeImage();
+				ctx.drawImage(monsterTest.img, monsterTest.x, monsterTest.y);
+			}
 		}
 		
 		function draw() {
@@ -753,6 +838,8 @@
 			drawImage();
 			
 			directionCheck();
+			
+			drawMonsterTest();
 			
 			drawAttack();
 			
