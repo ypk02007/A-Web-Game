@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.bog.component.ShutdownManager;
 import com.bog.model.PlayerInfo;
 import com.bog.model.Room;
+import com.bog.model.TestModel;
 import com.bog.service.StageService;
 
 @Controller
@@ -43,6 +44,10 @@ public class BOGController {
 		
 		Room[] roomInfo = stageService.roomInfoInit();
 		model.addAttribute("roomInfo", roomInfo);
+		
+		TestModel tm = new TestModel();
+		tm.setInfo("test info");
+		model.addAttribute("testInfo", tm);
 		
 		String stage = stageService.goToStage(posted);
 		
