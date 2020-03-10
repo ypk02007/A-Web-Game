@@ -66,13 +66,12 @@
 		
 		var roomNo = 0;
 		
-		var monsterTest = null;
+		var monster = null;
 		
 		document.addEventListener("keydown", keyDown, false);
 		document.addEventListener("keyup", keyUp, false);
 		
 		window.onload = function() {
-			included();
 			init();
 		};
 		
@@ -116,10 +115,6 @@
 				console.log("testFunction(playerInfo)");
 				testFunction(playerInfo);
 			}
-			if(key==71) {
-				console.log("testFunction(monsterTest)");	
-				testFunction(monsterTest);
-			}
 		}
 
 		function keyUp(e) {
@@ -139,13 +134,16 @@
 		}
 		
 		function testFunction(obj) {
-			if(obj==null) {
-				console.log("parameter is null");
-				return;
-			}
-			x = obj.x;
-			y = obj.y;
-			console.log("x: "+x+", y: "+y);
+			obj.x += 10;
+			obj.y += 10;
+			
+			objX = obj.x;
+			objY = obj.y;
+			pX = playerInfo.x;
+			pY = playerInfo.y;
+			
+			console.log("objX: "+objX+", objY: "+objY);
+			console.log("pX: "+pX+", pY: "+pY);
 		}
 		
 		function init() {
@@ -462,7 +460,7 @@
 			}
 		}
 		
-		function obstacleCheck(dir, obj) { // obj have to contain x, y, moveBox.x, moveBox.y, setBoxes() 
+		function obstacleCheck(dir, obj) { // obj have to contain x, y, moveBox.x, moveBox.y, status.speed, setBoxes() 
 			var mx = obj.moveBox.x + obj.moveBox.width/2;
 			var my = obj.moveBox.y + obj.moveBox.height/2;
 			var boundX = 30 + obj.moveBox.width/2;
@@ -481,53 +479,30 @@
 				vx = mx - ox;
 				vy = my - oy;
 				
-				if(Math.abs(vx) < boundX && Math.abs(vy) < boundY) {
+				if(Math.abs(vx) <= boundX && Math.abs(vy) <= boundY) {
+					
+					
+					console.log("mx: "+mx+", my: "+my);
+					console.log("ox: "+ox+", oy: "+oy);
 					switch(dir) {
 					case 0:
-						if(my > oy + 30) {
-							if(mx < ox && ((mx + obj.moveBox.width/2)-(ox - 30)) < 10) {
-								obj.x -= ((mx + obj.moveBox.width/2)-(ox - 30));
-								obj.setBoxes();
-							} else if (mx > ox && ((ox + 30)-(mx - obj.moveBox.width/2)) < 10) {
-								obj.x += ((ox + 30)-(mx - obj.moveBox.width/2));
-								obj.setBoxes();
-							}
+						if(my > oy + 30 && mx > ox - 30 && mx < ox + 30) {
+							
 							return false;
 						}
 						break;
 					case 1:
-						if(my < oy - 30) {
-							if(mx < ox && ((mx + obj.moveBox.width/2)-(ox - 30)) < 10) {
-								obj.x -= ((mx + obj.moveBox.width/2)-(ox - 30));
-								obj.setBoxes();
-							} else if (mx > ox && ((ox + 30)-(mx - obj.moveBox.width/2)) < 10) {
-								obj.x += ((ox + 30)-(mx - obj.moveBox.width/2));
-								obj.setBoxes();
-							}
+						if(my < oy - 30 && mx > ox - 30 && mx < ox + 30) {
 							return false;
 						}
 						break;
 					case 2:
-						if(mx > ox + 30) {
-							if(my < oy && ((my + obj.moveBox.height/2)-(oy - 30)) < 10) {
-								obj.y -= ((my + obj.moveBox.height/2)-(oy - 30));
-								obj.setBoxes();
-							} else if (my > oy && ((oy + 30)-(my - obj.moveBox.height/2)) < 10) {
-								obj.y += ((oy + 30)-(my - obj.moveBox.height/2));
-								obj.setBoxes();
-							}
+						if(mx > ox + 30 && my > oy - 30 && my < oy + 30) {
 							return false;
 						}
 						break;
 					case 3:
-						if(mx < ox - 30) {
-							if(my < oy && ((my + obj.moveBox.height/2)-(oy - 30)) < 10) {
-								obj.y -= ((my + obj.moveBox.height/2)-(oy - 30));
-								obj.setBoxes();
-							} else if (my > oy && ((oy + 30)-(my - obj.moveBox.height/2)) < 10) {
-								obj.y += ((oy + 30)-(my - obj.moveBox.height/2));
-								obj.setBoxes();
-							}
+						if(mx < ox - 30 && my > oy - 30 && my < oy + 30) {
 							return false;
 						}
 						break;
@@ -540,36 +515,23 @@
 		function obstacleAttackCheck(dir, x, y, size) {
 			var mx = x + size/2;
 			var my = y + size/2;
+			var boundX = 30 + size/2;
+			var boundY = 30 + size/2;
 			var ox;
 			var oy;
+			var vx;
+			var vy;
 			for(var i = 0; i < obstacle.length; i++) {
 				if(roomInfo[roomNo].obstacles[i][2] != 1) {
 					continue;
 				}
 				ox = roomInfo[roomNo].obstacles[i][0] * 60 + 60 + 30;
 				oy = roomInfo[roomNo].obstacles[i][1] * 60 + 60 + 30;
+				vx = mx - ox;
+				vy = my - oy;
 				
-				switch(dir) {
-				case 0:
-					if(mx < ox + 40 && mx > ox - 40 && my <= oy + 40) {
-						return false;
-					}
-					break;
-				case 1:
-					if(mx < ox + 40 && mx > ox - 40 && my >= oy - 40) {
-						return false;
-					}
-					break;
-				case 2:
-					if(my < oy + 40 && my > oy - 40 && mx <= ox + 40) {
-						return false;
-					}
-					break;
-				case 3:
-					if(my < oy + 40 && my > oy - 40 && mx >= ox - 40) {
-						return false;
-					}
-					break;
+				if(Math.abs(vx) < boundX && Math.abs(vy) < boundY) {
+					return false;
 				}
 			}
 			return true;
@@ -774,24 +736,23 @@
 					clearInterval(interval);
 					drawInterval = setInterval(draw, 20);
 					if(roomNo == 1) {
-						monsterTestSetting();
+						monsterSetting();
 					} else {
-						monsterTest = null;
+						monster = null;
 					}
 					controlFlag = true;
 				}
 			}, 20);
 		}
 		
-		function monsterTestSetting() {
-			monsterTest = monsterInit();
+		function monsterSetting() {
+			monster = monsterInit(0, 180, 120);
 		}
 		
-		function drawMonsterTest() {
-			if(monsterTest != null) {
-				monsterTest.move();
-				monsterTest.changeImage();
-				ctx.drawImage(monsterTest.img, monsterTest.x, monsterTest.y);
+		function drawMonster() {
+			if(monster != null) {
+				monster.move(playerInfo.moveBox.x, playerInfo.moveBox.y);
+				ctx.drawImage(monster.img, monster.x, monster.y);
 			}
 		}
 		
@@ -802,7 +763,7 @@
 			
 			directionCheck();
 			
-			drawMonsterTest();
+			drawMonster();
 			
 			drawAttack();
 			
