@@ -5,7 +5,7 @@ function monsterInit(monsterCode, x, y) {
 	var img;
 	
 	switch(monsterCode) {
-	case 0:
+	case 1:
 		img = setMonsterImg(monsterCode);
 		monster = knuckles(img, x, y);
 		break;

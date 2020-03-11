@@ -66,7 +66,7 @@
 		
 		var roomNo = 0;
 		
-		var monster = null;
+		var monster = [];
 		
 		document.addEventListener("keydown", keyDown, false);
 		document.addEventListener("keyup", keyUp, false);
@@ -259,6 +259,27 @@
 				}
 
 				obstacle.push(obstacleImg);
+			}
+		}
+		
+		function monsterSetting() {
+			if(monster.length > 0) {
+				monster.splice(0, monster.length);
+			}
+			
+			var monsters = roomInfo[roomNo].monsters;
+			
+			if(monsters == null) { // no monster room
+				return;
+			}
+			
+			for(var i = 0; i < monsters.length; i++) {
+				if(monsters[i][0] == 0) { // dead monster
+					continue;
+				}
+				var m = monsterInit(monsters[i][0], monsters[i][1], monsters[i][2]);
+
+				monster.push(m);
 			}
 		}
 		
@@ -482,7 +503,7 @@
 			}
 		}
 		
-		function obstacleCheck(dir, obj) { // obj have to contain x, y, moveBox.x, moveBox.y, status.speed, setBoxes() 
+		function obstacleCheck(dir, obj) { // obj must contain x, y, moveBox.x, moveBox.y, status.speed, setBoxes() 
 			var mx = obj.moveBox.x + obj.moveBox.width/2;
 			var my = obj.moveBox.y + obj.moveBox.height/2;
 			var boundX = 30 + obj.moveBox.width/2;
@@ -728,6 +749,7 @@
 			}
 			doorSetting();
 			obstacleSetting();
+			monsterSetting();
 			
 			switch(dir) {
 			case 0:
@@ -770,25 +792,16 @@
 				if(rx == 0 && ry == 0) {
 					clearInterval(interval);
 					drawInterval = setInterval(draw, 20);
-					if(roomNo == 1) {
-						monsterSetting();
-					} else {
-						monster = null;
-					}
 					controlFlag = true;
 				}
 			}, 20);
 		}
 		
-		function monsterSetting() {
-			monster = monsterInit(0, 180, 120);
-		}
-		
 		function drawMonster() {
-			if(monster != null) {
-				monster.move(playerInfo.moveBox.x, playerInfo.moveBox.y);
-				ctx.drawImage(monster.img, monster.x, monster.y);
-				playerCollisionCheck(monster);
+			for(var i = 0; i < monster.length; i++) {
+				monster[i].move(playerInfo.moveBox.x, playerInfo.moveBox.y);
+				ctx.drawImage(monster[i].img, monster[i].x, monster[i].y);
+				playerCollisionCheck(monster[i]);
 			}
 		}
 		
