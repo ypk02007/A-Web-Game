@@ -11,6 +11,7 @@ function monsterInit(monsterCode, x, y) {
 		break;
 	}
 	
+	monster.setBoxes();
 	return monster;
 }
 
@@ -34,6 +35,12 @@ function knuckles(img, x, y) {
 			y: 0,
 			width: 40,
 			height: 40
+		},
+		hitBox: {
+			x: 0,
+			y: 0,
+			width: 50,
+			height: 50
 		},
 		dir: 3,
 		img: img,
@@ -79,6 +86,8 @@ function knuckles(img, x, y) {
 		setBoxes: function() {
 			this.moveBox.x = this.x + 10;
 			this.moveBox.y = this.y + 20;
+			this.hitBox.x = this.x + 10;
+			this.hitBox.y = this.y + 10;
 		},
 		changeImage: function() {
 			this.changeDirCount++;

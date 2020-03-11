@@ -162,6 +162,13 @@
 					width: 40,
 					height: 40
 				},
+				hitBox: {
+					x: 0,
+					y: 0,
+					width: 40,
+					height: 50
+				},
+				invincibleFlag: false,
 				coin: [[${playerInfo.coin}]],
 				bomb: [[${playerInfo.bomb}]],
 				key: [[${playerInfo.key}]],
@@ -177,6 +184,23 @@
 				setBoxes: function() {
 					this.moveBox.x = this.x + 20;
 					this.moveBox.y = this.y + 40;
+					this.hitBox.x = this.x + 20;
+					this.hitBox.y = this.y + 30;
+				},
+				damaged: function(dmg) {
+					if(!this.invincibleFlag) {
+						this.status.life--;
+						this.invincibleFlag = true;
+						
+						if(this.status.life <= 0) {
+							console.log("Gamjeon died");
+							clearInterval(drawInterval);
+						} else {
+							setTimeout(function() {
+								playerInfo.invincibleFlag = false;
+							}, 2000);
+						}
+					}
 				}
 			};
 			
@@ -312,8 +336,6 @@
 				console.log("bomb start");
 			}
 		}
-		
-		
 	
 		function setPlayerBody() {
 			var src;
@@ -480,29 +502,24 @@
 				vy = my - oy;
 				
 				if(Math.abs(vx) <= boundX && Math.abs(vy) <= boundY) {
-					
-					
-					console.log("mx: "+mx+", my: "+my);
-					console.log("ox: "+ox+", oy: "+oy);
 					switch(dir) {
 					case 0:
-						if(my > oy + 30 && mx > ox - 30 && mx < ox + 30) {
-							
+						if(my > oy && mx > ox - boundX && mx < ox + boundX) {
 							return false;
 						}
 						break;
 					case 1:
-						if(my < oy - 30 && mx > ox - 30 && mx < ox + 30) {
+						if(my < oy && mx > ox - boundX && mx < ox + boundX) {
 							return false;
 						}
 						break;
 					case 2:
-						if(mx > ox + 30 && my > oy - 30 && my < oy + 30) {
+						if(mx > ox && my > oy - boundY && my < oy + boundY) {
 							return false;
 						}
 						break;
 					case 3:
-						if(mx < ox - 30 && my > oy - 30 && my < oy + 30) {
+						if(mx < ox && my > oy - boundY && my < oy + boundY) {
 							return false;
 						}
 						break;
@@ -557,6 +574,17 @@
 			}
 		}
 		
+		function playerCollisionCheck(m) {
+			var vx = (playerInfo.hitBox.x + playerInfo.hitBox.width/2) - (m.hitBox.x + m.hitBox.width/2);
+			var vy = (playerInfo.hitBox.y + playerInfo.hitBox.height/2) - (m.hitBox.y + m.hitBox.height/2);
+			var boundX = (playerInfo.hitBox.width + m.hitBox.width)/2;
+			var boundY = (playerInfo.hitBox.height + m.hitBox.height)/2;
+			
+			if(Math.abs(vx) < boundX && Math.abs(vy) < boundY) {
+				playerInfo.damaged(m.status.damage);
+			}
+		}
+		
 		function drawImage() {
 			pbody.src = setPlayerBody();
 			phead.src = setPlayerHead();
@@ -575,8 +603,15 @@
 				drawBomb();
 			}
 			
-			ctx.drawImage(pbody, playerInfo.x, playerInfo.y);
-			ctx.drawImage(phead, playerInfo.x, playerInfo.y);
+			if(playerInfo.invincibleFlag) {
+				ctx.globalAlpha = 0.5;
+				ctx.drawImage(pbody, playerInfo.x, playerInfo.y);
+				ctx.drawImage(phead, playerInfo.x, playerInfo.y);
+				ctx.globalAlpha = 1;
+			} else {
+				ctx.drawImage(pbody, playerInfo.x, playerInfo.y);
+				ctx.drawImage(phead, playerInfo.x, playerInfo.y);
+			}
 		}
 		
 		function drawAttack() {
@@ -753,6 +788,7 @@
 			if(monster != null) {
 				monster.move(playerInfo.moveBox.x, playerInfo.moveBox.y);
 				ctx.drawImage(monster.img, monster.x, monster.y);
+				playerCollisionCheck(monster);
 			}
 		}
 		
