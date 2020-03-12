@@ -46,7 +46,7 @@
 		var bomb = document.getElementById("bomb");
 		
 		var roomInfo = [];
-		var roomNo;
+		var roomNo = 0;
 		var playerInfo;
 		var bombInfo;
 		
@@ -63,8 +63,6 @@
 		var controlFlag = true;
 		var attackFlag = true;
 		var bombFlag = true;
-		
-		var roomNo = 0;
 		
 		var monster = [];
 		
@@ -156,6 +154,8 @@
 			playerInfo = {
 				x: [[${pos[0]}]],
 				y: [[${pos[1]}]],
+				width: 60,
+				height: 60,
 				moveBox: {
 					x: 0,
 					y: 0,
@@ -189,7 +189,7 @@
 				},
 				damaged: function(dmg) {
 					if(!this.invincibleFlag) {
-						this.status.life--;
+						this.status.life - dmg;
 						this.invincibleFlag = true;
 						
 						if(this.status.life <= 0) {
@@ -319,7 +319,10 @@
 						this.rangeCount++;
 					},
 					isValid: function() {
-						if(!obstacleAttackCheck(this.dir, this.x, this.y, 20)) {
+						if(monsterDamagedCheck(this.x, this.y)) {
+							console.log("attack removed by monster");
+							return false;
+						} if(!obstacleAttackCheck(this.dir, this.x, this.y, 20)) {
 							console.log("attack removed by obstacle");
 							return false;
 						} else if(this.x < wall[2] || this.x > cw - wall[3]) {
@@ -606,6 +609,27 @@
 			}
 		}
 		
+		function monsterDamagedCheck(bx, by) {
+			var vx;
+			var vy;
+			var boundX;
+			var boundY;
+			
+			for(var i = 0; i < monster.length; i++) {
+				vx = monster[i].moveBox.x - bx;
+				vy = monster[i].moveBox.y - by;
+				boundX = monster[i].moveBox.width/2 + 10;
+				boundY = monster[i].moveBox.height/2 + 10;
+				
+				if(Math.abs(vx) < boundX && Math.abs(vy) < boundY) {
+					monster[i].damaged(playerInfo.status.damage);
+					console.log("monster damaged");
+					return true;
+				}
+			}
+			return false;
+		}
+		
 		function drawImage() {
 			pbody.src = setPlayerBody();
 			phead.src = setPlayerHead();
@@ -799,6 +823,10 @@
 		
 		function drawMonster() {
 			for(var i = 0; i < monster.length; i++) {
+				if(monster[i].status.life <= 0) {
+					roomInfo[roomNo].monsters[i][0] = 0;
+					continue;
+				}
 				monster[i].move(playerInfo.moveBox.x, playerInfo.moveBox.y);
 				ctx.drawImage(monster[i].img, monster[i].x, monster[i].y);
 				playerCollisionCheck(monster[i]);
@@ -812,9 +840,9 @@
 			
 			directionCheck();
 			
-			drawMonster();
-			
 			drawAttack();
+			
+			drawMonster();
 			
 			wallCheck();
 			

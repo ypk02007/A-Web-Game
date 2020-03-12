@@ -24,7 +24,7 @@ public class StageService {
 		
 		switch(name) {
 		case "gamjeon":
-			status = new Status(6, 6, 3, 5, 20);
+			status = new Status(12, 12, 1, 5, 20);
 			playerInfo = new PlayerInfo(3, 2, 1, 1, 0, status);
 			break;
 		default:
@@ -62,7 +62,9 @@ public class StageService {
 		
 		int[] door5 = {1, 1, 2, 0};
 		int[] link5 = {6, 8, 0, 0};
+		int[][] monster5 = {{3, 300 ,100}};
 		roomInfo[5] = new Room(door5, link5, 1, map[5], setObstacles(1, 5));
+		roomInfo[5].setMonsters(monster5);
 		
 		int[] door6 = {0, 1, 0, 1};
 		int[] link6 = {0, 5, 0, 7};
