@@ -18,9 +18,10 @@ public class Room {
 	private int[][] obstacles; // {gridX, gridY, obstacleCode}
 	
 	private int[][] monsters; // {monsterCode, x, y}
+	
+	private Chest chest;
 
 	public Room(int[] doors, int[] linked, int visited, int[] map, int[][] obstacles) {
-		super();
 		this.doors = doors;
 		this.linked = linked;
 		this.visited = visited;

@@ -58,7 +58,7 @@ function knuckles(img, x, y) {
 		move: function(pmx, pmy) {
 			var mx = this.moveBox.x;
 			var my = this.moveBox.y;
-			var roomEdge = [60, 360-this.moveBox.height, 60, 480-this.moveBox.width];
+			var roomEdge = [40, 360-this.moveBox.height, 40, 480-this.moveBox.width];
 			if(pmx > mx + 5) {
 				this.dirX = 3;
 				if(mx < roomEdge[3] && obstacleCheck(this.dirX, this)) {
@@ -145,7 +145,7 @@ function sonic(img, x, y) {
 		move: function(pmx, pmy) {
 			var mx = this.moveBox.x;
 			var my = this.moveBox.y;
-			var roomEdge = [60, 360-this.moveBox.height, 60, 480-this.moveBox.width];
+			var roomEdge = [40, 360-this.moveBox.height, 40, 480-this.moveBox.width];
 			
 			if(!this.superSonicFlag) {
 				this.changeImage(pmx, pmy, mx, my);
@@ -228,7 +228,7 @@ function hog(img, x, y) {
 		move: function(pmx, pmy) {
 			var mx = this.moveBox.x;
 			var my = this.moveBox.y;
-			var roomEdge = [60, 360-this.moveBox.height, 60, 480-this.moveBox.width];
+			var roomEdge = [40, 360-this.moveBox.height, 40, 480-this.moveBox.width];
 			if(pmx > mx + 5) {
 				this.dirX = 3;
 				if(mx < roomEdge[3]) {

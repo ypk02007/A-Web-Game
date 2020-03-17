@@ -10,14 +10,16 @@
 <body>
 
 	<img id="info_heart" width="20" height="20" src="img/info/heart.png">
-	<img id="info_heart_half" width="30" height="30" src="img/info/heart_half.png">
+	<img id="info_heart_half" width="20" height="20" src="img/info/heart_half.png">
+	<img id="info_electric_heart" width="20" height="20" src="img/info/electric_heart.png">
+	<img id="info_electric_heart_half" width="20" height="20" src="img/info/electric_heart_half.png">
 	<img id="info_coin" width="20" height="20" src="img/info/coin.png">
 	<img id="info_bomb" width="20" height="20" src="img/info/bomb.png">
 	<img id="info_key" width="20" height="20" src="img/info/key.png">
 	<img id="info_inventory" width="105" height="70" src="img/info/inventory.png">
 
-	<img id="room" width="540" height="420" src="img/bg/room/room.png">
-	<img id="floor" width="420" height="300" src="img/bg/room/control_description.png">
+	<img id="room" width="540" height="420" src="img/sprite/room/room.png">
+	<img id="floor" width="420" height="300" src="img/sprite/room/control_description.png">
 	<img id="phead" width="80" height="80" src="img/character/gamjeon_head_front.png">
 	<img id="pbody" width="80" height="80" src="img/character/gamjeon_body_front.png">
 	<img id="attack" width="20" height="20" src="img/character/weapon/default.png">
@@ -177,6 +179,7 @@
 				status: {
 					life: [[${playerInfo.status.life}]],
 					maxLife: [[${playerInfo.status.maxLife}]],
+					eLife: [[${playerInfo.status.eLife}]],
 					damage: [[${playerInfo.status.damage}]],
 					speed: [[${playerInfo.status.speed}]],
 					range: [[${playerInfo.status.range}]]
@@ -189,7 +192,11 @@
 				},
 				damaged: function(dmg) {
 					if(!this.invincibleFlag) {
-						this.status.life - dmg;
+						if(this.status.eLife > 0) {
+							this.status.eLife -= dmg;
+						} else {
+							this.status.life -= dmg;
+						}
 						this.invincibleFlag = true;
 						
 						if(this.status.life <= 0) {
@@ -225,10 +232,10 @@
 				doorImg.setAttribute("height", "60");
 				
 				if(doors[i] == 1) {
-					doorImg.setAttribute("src", "img/bg/room/door_closed.png");
+					doorImg.setAttribute("src", "img/sprite/room/door_closed.png");
 					door[i] = doorImg;
 				} else if(doors[i] == 2) {
-					doorImg.setAttribute("src", "img/bg/room/door_opened.png");
+					doorImg.setAttribute("src", "img/sprite/room/door_opened.png");
 					door[i] = doorImg;
 				}
 			}
@@ -248,13 +255,13 @@
 				
 				switch(obstacles[i][2]) {
 				case 1:
-					obstacleImg.setAttribute("src", "img/bg/room/stone.png");
+					obstacleImg.setAttribute("src", "img/sprite/room/stone.png");
 					break;
 				case 2:
-					obstacleImg.setAttribute("src", "img/bg/room/pit_edge.png");
+					obstacleImg.setAttribute("src", "img/sprite/room/pit_edge.png");
 					break;
 				case 3:
-					obstacleImg.setAttribute("src", "img/bg/room/stone_was_here.png");
+					obstacleImg.setAttribute("src", "img/sprite/room/stone_was_here.png");
 					break;
 				}
 
@@ -478,6 +485,35 @@
 			}
 		}
 		
+		function chestCheck() {
+			var chest = roomInfo[roomNo].chest;
+			if(chest == null) {
+				return;
+			}
+			
+			var cx = chest.x * 60 + 60;
+			var cy = chest.y * 60 + 60;
+			var vx = playerInfo.moveBox.x - cx;
+			var vy = playerInfo.moveBox.y - cy;
+			
+			if(Math.abs(vx) < 50 && Math.abs(vx) < 50 && !chest.opened) {
+				roomInfo[roomNo].chest.opened = true;
+				var itemSrc = "img/item/"+chest.itemCode+".png";
+				var itemImg = document.createElement("img");
+				itemImg.setAttribute("width", "20");
+				itemImg.setAttribute("height", "20");
+				itemImg.setAttribute("src", itemSrc);
+				var i = 0;
+				var itemGet = setInterval(function() {
+					ctx.drawImage(itemImg, cx + 20, cy - i * 10 + 20);
+					i++;
+					if(i == 8) {
+						clearInterval(itemGet);
+					}
+				}, 40);
+			}
+		}
+		
 		function wallCheck() {
 			var doors = roomInfo[roomNo].doors;
 			
@@ -592,7 +628,7 @@
 				
 				if(Math.abs(mx-ox) < (bomb.width + 60)/2 && Math.abs(my-oy) < (bomb.height + 60)/2) {
 					roomInfo[roomNo].obstacles[i][2] = 3;
-					obstacle[i].src = "img/bg/room/stone_was_here.png";
+					obstacle[i].src = "img/sprite/room/stone_was_here.png";
 				}
 				
 			}
@@ -642,7 +678,8 @@
 				ctx.fillStyle = '#C3C3C3';
 				ctx.fillRect(60, 60, floor.width, floor.height);
 			}
-			drawObstacle();
+			
+			drawChestAndObstacle();
 			
 			if(!bombFlag) {
 				drawBomb();
@@ -711,7 +748,19 @@
 			}
 		}
 		
-		function drawObstacle() {
+		function drawChestAndObstacle() {
+			var chest = roomInfo[roomNo].chest;
+			if(chest != null) {
+				var chestImg = document.createElement("img");
+				chestImg.setAttribute("width", "60");
+				chestImg.setAttribute("height", "60");
+				if(!chest.opened && !chest.locked) {
+					chestImg.src = "img/sprite/chest_closed.png";
+				} else if(chest.opened && !chest.locked) {
+					chestImg.src = "img/sprite/chest_opened.png";
+				}
+				ctx.drawImage(chestImg, chest.x * 60 + 60, chest.y * 60 + 60);
+			}
 			for(var i = 0; i < obstacle.length; i++) {
 				ctx.drawImage(obstacle[i], roomInfo[roomNo].obstacles[i][0] * 60 + 60, roomInfo[roomNo].obstacles[i][1] * 60 + 60);
 			}
@@ -849,6 +898,8 @@
 			playerMove();
 			
 			doorCheck();
+			
+			chestCheck();
 		}
 		
 		function drawInfo() {
@@ -858,9 +909,11 @@
 			var inventory = document.getElementById("info_inventory");
 			var heart = document.getElementById("info_heart");
 			var heart_half = document.getElementById("info_heart_half");
+			var eHeart = document.getElementById("info_electric_heart");
+			var eHeart_half = document.getElementById("info_electric_heart_half");
 			var count;
 			var life = playerInfo.status.life;
-			var i = 0;
+			var eLife = playerInfo.status.eLife;
 			
 			ctx2.clearRect(0, 0, infoCanvas.width, infoCanvas.height);
 			
@@ -905,15 +958,41 @@
 			
 			ctx2.fillText("LIFE", 430, 25);
 			
+			var vGap = 0;
+			var hGap = 0;
 			while(life>0) {
+				if(vGap > 1) {
+					break;
+				}
 				if(life>1) {
-					ctx2.drawImage(heart, 25*i + 380, 30);
+					ctx2.drawImage(heart, 25*hGap + 380, 30 + 25*vGap);
 					life -= 2;
 				} else {
-					ctx2.drawImage(heart_half, 25*i + 380, 30);
+					ctx2.drawImage(heart_half, 25*hGap + 380, 30 + 25*vGap);
 					life--;
 				}
-				i++;
+				hGap++;
+				if(hGap==6) {
+					vGap = 1;
+					hGap = 0;
+				}
+			}
+			while(eLife>0) {
+				if(vGap > 1) {
+					break;
+				}
+				if(eLife>1) {
+					ctx2.drawImage(eHeart, 25*hGap + 380, 30 + 25*vGap);
+					eLife -= 2;
+				} else {
+					ctx2.drawImage(eHeart_half, 25*hGap + 380, 30 + 25*vGap);
+					eLife--;
+				}
+				hGap++;
+				if(hGap==6) {
+					vGap = 1;
+					hGap = 0;
+				}
 			}
 		}
 		/*]]>*/

@@ -13,6 +13,8 @@ public class Status {
 	
 	private int maxLife;
 	
+	private int eLife;
+	
 	private int damage;
 	
 	private int speed;
