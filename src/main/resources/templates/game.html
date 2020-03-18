@@ -8,22 +8,15 @@
 
 </head>
 <body>
-
-	<img id="info_heart" width="20" height="20" src="img/info/heart.png">
-	<img id="info_heart_half" width="20" height="20" src="img/info/heart_half.png">
-	<img id="info_electric_heart" width="20" height="20" src="img/info/electric_heart.png">
-	<img id="info_electric_heart_half" width="20" height="20" src="img/info/electric_heart_half.png">
-	<img id="info_coin" width="20" height="20" src="img/info/coin.png">
-	<img id="info_bomb" width="20" height="20" src="img/info/bomb.png">
-	<img id="info_key" width="20" height="20" src="img/info/key.png">
+	
+	<img id="item" width="140" height="20" src="img/item/item.png">
 	<img id="info_inventory" width="105" height="70" src="img/info/inventory.png">
 
 	<img id="room" width="540" height="420" src="img/sprite/room/room.png">
 	<img id="floor" width="420" height="300" src="img/sprite/room/control_description.png">
-	<img id="phead" width="80" height="80" src="img/character/gamjeon_head_front.png">
-	<img id="pbody" width="80" height="80" src="img/character/gamjeon_body_front.png">
+	<img id="player" width="320" height="160" src="img/character/gamjeon.png">
 	<img id="attack" width="20" height="20" src="img/character/weapon/default.png">
-	<img id="bomb" width="40" height="40" src="img/sprite/bomb_ignited_0.png">
+	<img id="bomb" width="40" height="40" src="img/sprite/bomb.png">
 	
 	<canvas id="info" width="540" height="80"></canvas>
 	<canvas id="canvas" width="540" height="420"></canvas>
@@ -38,12 +31,12 @@
 		const cw = canvas.width;
 		const ch = canvas.height;
 
+		var item = document.getElementById("item");
 		var room = document.getElementById("room");
 		var door = [null, null, null, null];
 		var obstacle = [];
 		var floor = document.getElementById("floor");
-		var phead = document.getElementById("phead");
-		var pbody = document.getElementById("pbody");
+		var player = document.getElementById("player");
 		var attack = document.getElementById("attack");
 		var bomb = document.getElementById("bomb");
 		
@@ -367,58 +360,6 @@
 				console.log("bomb start");
 			}
 		}
-	
-		function setPlayerBody() {
-			var src;
-			switch(directionCode) {
-			case 0:
-				src = "img/character/gamjeon_body_back.png";
-				break;
-			case 1:
-				src = "img/character/gamjeon_body_back.png";
-				break;
-			case 2:
-				src = "img/character/gamjeon_body_right.png";
-				break;
-			case 3:
-				src = "img/character/gamjeon_body_right.png";
-				break;
-			case 4:
-				src = "img/character/gamjeon_body_front.png";
-				break;
-			case 5:
-				src = "img/character/gamjeon_body_front.png";
-				break;
-			case 6:
-				src = "img/character/gamjeon_body_left.png";
-				break;
-			case 7:
-				src = "img/character/gamjeon_body_left.png";
-				break;
-			default:
-				src	= "img/character/gamjeon_lying.png"
-			}
-			return src;
-		}
-		
-		function setPlayerHead() {
-			var src;
-			switch(attackDirection) {
-			case 0:
-				src = "img/character/gamjeon_head_back.png";
-				break;
-			case 1:
-				src = "img/character/gamjeon_head_front.png";
-				break;
-			case 2:
-				src = "img/character/gamjeon_head_left.png";
-				break;
-			case 3:
-				src = "img/character/gamjeon_head_right.png";
-				break;
-			}
-			return src;
-		}
 		
 		function playerMove() {
 			var x = playerInfo.moveBox.x;
@@ -447,28 +388,28 @@
 				if(pressed[3]) {
 					directionCode = 1;
 				} else if(pressed[2]) {
-					directionCode = 7;
+					directionCode = 5;
 				}
 			} else if(pressed[1]) {
-				directionCode = 4;
+				directionCode = 2;
 				if(pressed[2]) {
-					directionCode = 5;
-				} else if(pressed[3]) {
 					directionCode = 3;
+				} else if(pressed[3]) {
+					directionCode = 7;
 				}
 			} else if(pressed[2]) {
-				directionCode = 6;
+				directionCode = 4;
 				if(pressed[0]) {
-					directionCode = 7;
-				} else if(pressed[1]) {
 					directionCode = 5;
+				} else if(pressed[1]) {
+					directionCode = 3;
 				}
 			} else if(pressed[3]) {
-				directionCode = 2;
+				directionCode = 6;
 				if(pressed[0]) {
 					directionCode = 1;
 				} else if(pressed[1]) {
-					directionCode = 3;
+					directionCode = 7;
 				}
 			}
 		}
@@ -496,16 +437,11 @@
 			var vx = playerInfo.moveBox.x - cx;
 			var vy = playerInfo.moveBox.y - cy;
 			
-			if(Math.abs(vx) < 50 && Math.abs(vx) < 50 && !chest.opened) {
+			if(Math.abs(vx) < 50 && Math.abs(vy) < 50 && !chest.opened) {
 				roomInfo[roomNo].chest.opened = true;
-				var itemSrc = "img/item/"+chest.itemCode+".png";
-				var itemImg = document.createElement("img");
-				itemImg.setAttribute("width", "20");
-				itemImg.setAttribute("height", "20");
-				itemImg.setAttribute("src", itemSrc);
 				var i = 0;
 				var itemGet = setInterval(function() {
-					ctx.drawImage(itemImg, cx + 20, cy - i * 10 + 20);
+					ctx.drawImage(item, chest.itemCode*20, 0, 20, 20, cx + 20, cy - i * 10 + 20, 20, 20);
 					i++;
 					if(i == 8) {
 						clearInterval(itemGet);
@@ -520,7 +456,7 @@
 			var dx = cw/2 - 30;
 			var dy = ch/2 - 30;
 			
-			if(playerInfo.moveBox.x >= dx && playerInfo.moveBox.x <= dx + 20 && playerInfo.moveBox.y < (ch/2-pbody.height/2) && doors[0] == 2) {
+			if(playerInfo.moveBox.x >= dx && playerInfo.moveBox.x <= dx + 20 && playerInfo.moveBox.y < (ch/2-40) && doors[0] == 2) {
 				wall[0] = 40;
 				wall[1] = 60;
 			} else if(playerInfo.moveBox.x >= dx && playerInfo.moveBox.x <= dx + 20 && doors[1] == 2) {
@@ -530,7 +466,7 @@
 				wall[0] = 60;
 				wall[1] = 60;
 			}
-			if(playerInfo.moveBox.y >= dy && playerInfo.moveBox.y <= dy + 20 && playerInfo.moveBox.x < (cw/2-pbody.width/2) && doors[2] == 2) {
+			if(playerInfo.moveBox.y >= dy && playerInfo.moveBox.y <= dy + 20 && playerInfo.moveBox.x < (cw/2-40) && doors[2] == 2) {
 				wall[2] = 40;
 				wall[3] = 60;
 			} else if(playerInfo.moveBox.y >= dy && playerInfo.moveBox.y <= dy + 20 && doors[3] == 2) {
@@ -667,11 +603,10 @@
 		}
 		
 		function drawImage() {
-			pbody.src = setPlayerBody();
-			phead.src = setPlayerHead();
-
 			ctx.drawImage(room, 0, 0);
+			
 			drawDoor();
+			
 			if(roomNo == 0) {
 				ctx.drawImage(floor, 60, 60);
 			} else {
@@ -685,14 +620,15 @@
 				drawBomb();
 			}
 			
+			var bodyCrop = Math.floor(directionCode/2);
 			if(playerInfo.invincibleFlag) {
 				ctx.globalAlpha = 0.5;
-				ctx.drawImage(pbody, playerInfo.x, playerInfo.y);
-				ctx.drawImage(phead, playerInfo.x, playerInfo.y);
+				ctx.drawImage(player, bodyCrop * 80, 80, 80, 80, playerInfo.x, playerInfo.y, 80, 80);
+				ctx.drawImage(player, attackDirection * 80, 0, 80, 80, playerInfo.x, playerInfo.y, 80, 80);
 				ctx.globalAlpha = 1;
 			} else {
-				ctx.drawImage(pbody, playerInfo.x, playerInfo.y);
-				ctx.drawImage(phead, playerInfo.x, playerInfo.y);
+				ctx.drawImage(player, bodyCrop * 80, 80, 80, 80, playerInfo.x, playerInfo.y, 80, 80);
+				ctx.drawImage(player, attackDirection * 80, 0, 80, 80, playerInfo.x, playerInfo.y, 80, 80);
 			}
 		}
 		
@@ -767,28 +703,40 @@
 		}
 		
 		function drawBomb() {
+			var bombCropX;
+			var bombCropY;
+			var width;
+			var height;
 			if(bombInfo.count < 50 && bombInfo.count%5 == 0 && bombInfo.count%10 == 0) {
-				bomb.src = "img/sprite/bomb_ignited_0.png";
+				bombCropX = 0;
+				bombCropY = 0;
+				width = 40;
+				height = 40;
 			} else if(bombInfo.count < 50 && bombInfo.count%5 == 0 && bombInfo.count%10 != 0) {
-				bomb.src = "img/sprite/bomb_ignited_1.png";
+				bombCropX = 40;
+				bombCropY = 0;
+				width = 40;
+				height = 40;
 			} else if(bombInfo.count == 50) {
-				bomb.width = "160";
-				bomb.height = "160";
+				bombCropX = 0;
+				bombCropY = 40;
+				width = 160;
+				height = 160;
 				bombInfo.x -= 60;
 				bombInfo.y -= 60;
 				obstacleDestroyCheck();
-				bomb.src = "img/sprite/explosion_0.png";
 			} else if(bombInfo.count == 55) {
-				bomb.src = "img/sprite/explosion_1.png";
+				bombCropX = 0;
+				bombCropY = 200;
+				width = 160;
+				height = 160;
 			} else if(bombInfo.count == 60) {
-				bomb.width = "40";
-				bomb.height = "40";
 				bombFlag = true;
 				console.log("bomb end");
 				return;
 			}
 			
-			ctx.drawImage(bomb, bombInfo.x, bombInfo.y);
+			ctx.drawImage(bomb, bombCropX, bombCropY, width, height, bombInfo.x, bombInfo.y, width, height);
 			
 			bombInfo.count++;
 		}
@@ -828,22 +776,22 @@
 			case 0:
 				sliceX = 0; sliceY = 20;
 				rx = 0; ry = -ch;
-				playerInfo.x = cw/2 - pbody.width/2; playerInfo.y = ch - (60 + pbody.height);
+				playerInfo.x = cw/2 - 40; playerInfo.y = ch - 140;
 				break;
 			case 1:
 				sliceX = 0; sliceY = -20;
 				rx = 0; ry = ch;
-				playerInfo.x = cw/2 + pbody.width/2; playerInfo.y = 60;
+				playerInfo.x = cw/2 + 40; playerInfo.y = 60;
 				break;
 			case 2:
 				sliceX = 20; sliceY = 0;
 				rx = -cw; ry = 0;
-				playerInfo.x = cw - (60 + pbody.width); playerInfo.y = ch/2 - pbody.height/2;
+				playerInfo.x = cw - 140; playerInfo.y = ch/2 - 40;
 				break;
 			case 3:
 				sliceX = -20; sliceY = 0;
 				rx = cw; ry = 0;
-				playerInfo.x = 60; playerInfo.y = playerInfo.y = ch/2 - pbody.height/2;
+				playerInfo.x = 60; playerInfo.y = playerInfo.y = ch/2 - 40;
 				break;
 			}
 			
@@ -903,14 +851,7 @@
 		}
 		
 		function drawInfo() {
-			var coin = document.getElementById("info_coin");
-			var bomb = document.getElementById("info_bomb");
-			var key = document.getElementById("info_key");
 			var inventory = document.getElementById("info_inventory");
-			var heart = document.getElementById("info_heart");
-			var heart_half = document.getElementById("info_heart_half");
-			var eHeart = document.getElementById("info_electric_heart");
-			var eHeart_half = document.getElementById("info_electric_heart_half");
 			var count;
 			var life = playerInfo.status.life;
 			var eLife = playerInfo.status.eLife;
@@ -933,21 +874,21 @@
 			}
 			ctx2.fillStyle = "#000000";
 			
-			ctx2.drawImage(coin, 165, 5);
+			ctx2.drawImage(item, 60, 0, 20, 20, 165, 5, 20, 20);
 			count = playerInfo.coin;
 			if(count<10) {
 				count = "0"+count;
 			}
 			ctx2.fillText("x " + count, 195, 20);
 			
-			ctx2.drawImage(bomb, 165, 30);
+			ctx2.drawImage(item, 40, 0, 20, 20, 165, 30, 20, 20);
 			count = playerInfo.bomb;
 			if(count<10) {
 				count = "0"+count;
 			}
 			ctx2.fillText("x " + count, 195, 46);
 			
-			ctx2.drawImage(key, 165, 55);
+			ctx2.drawImage(item, 80, 0, 20, 20, 165, 55, 20, 20);
 			count = playerInfo.key;
 			if(count<10) {
 				count = "0"+count;
@@ -965,10 +906,10 @@
 					break;
 				}
 				if(life>1) {
-					ctx2.drawImage(heart, 25*hGap + 380, 30 + 25*vGap);
+					ctx2.drawImage(item, 0, 0, 20, 20, 25*hGap + 380, 30 + 25*vGap, 20, 20);
 					life -= 2;
 				} else {
-					ctx2.drawImage(heart_half, 25*hGap + 380, 30 + 25*vGap);
+					ctx2.drawImage(item, 20, 0, 20, 20, 25*hGap + 380, 30 + 25*vGap, 20, 20);
 					life--;
 				}
 				hGap++;
@@ -982,10 +923,10 @@
 					break;
 				}
 				if(eLife>1) {
-					ctx2.drawImage(eHeart, 25*hGap + 380, 30 + 25*vGap);
+					ctx2.drawImage(item, 100, 0, 20, 20, 25*hGap + 380, 30 + 25*vGap, 20, 20);
 					eLife -= 2;
 				} else {
-					ctx2.drawImage(eHeart_half, 25*hGap + 380, 30 + 25*vGap);
+					ctx2.drawImage(item, 120, 0, 20, 20, 25*hGap + 380, 30 + 25*vGap, 20, 20);
 					eLife--;
 				}
 				hGap++;
