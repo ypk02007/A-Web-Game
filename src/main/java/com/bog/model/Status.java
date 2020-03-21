@@ -20,4 +20,6 @@ public class Status {
 	private int speed;
 	
 	private int range;
+	
+	private int delay;
 }

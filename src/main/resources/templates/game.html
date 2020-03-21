@@ -11,7 +11,8 @@
 	
 	<img id="item" width="140" height="20" src="img/item/item.png">
 	<img id="info_inventory" width="105" height="70" src="img/info/inventory.png">
-
+	<img id="chest" width="240" height="60" src="img/sprite/chest.png">
+	<img id="door" width="240" height="480" src="img/sprite/room/door.png">
 	<img id="room" width="540" height="420" src="img/sprite/room/room.png">
 	<img id="floor" width="420" height="300" src="img/sprite/room/control_description.png">
 	<img id="player" width="320" height="160" src="img/character/gamjeon.png">
@@ -22,6 +23,7 @@
 	<canvas id="canvas" width="540" height="420"></canvas>
 	
 	<script type="text/javascript" src="js/monster.js"></script>
+	<script type="text/javascript" src="js/item.js"></script>
 	<script th:inline="javascript">
 		/*<![CDATA[*/
 		var canvas = document.getElementById("canvas");
@@ -31,14 +33,16 @@
 		const cw = canvas.width;
 		const ch = canvas.height;
 
-		var item = document.getElementById("item");
-		var room = document.getElementById("room");
-		var door = [null, null, null, null];
-		var obstacle = [];
-		var floor = document.getElementById("floor");
-		var player = document.getElementById("player");
-		var attack = document.getElementById("attack");
-		var bomb = document.getElementById("bomb");
+		var itemImg = document.getElementById("item");
+		var roomImg = document.getElementById("room");
+		var chestImg = document.getElementById("chest");
+		var doorImg = document.getElementById("door");
+		var doorImgInfo = [null, null, null, null];
+		var obstacleImg = [];
+		var floorImg = document.getElementById("floor");
+		var playerImg = document.getElementById("player");
+		var attackImg = document.getElementById("attack");
+		var bombImg = document.getElementById("bomb");
 		
 		var roomInfo = [];
 		var roomNo = 0;
@@ -104,9 +108,8 @@
 				bombSetting(playerInfo.moveBox.x, playerInfo.moveBox.y);
 			}
 			
-			if(key==70) {
-				console.log("testFunction(playerInfo)");
-				testFunction(playerInfo);
+			if(key==69) {
+				showLife();
 			}
 		}
 
@@ -124,19 +127,6 @@
 			} else if(key==68) {
 				pressed[3] = false;
 			}
-		}
-		
-		function testFunction(obj) {
-			obj.x += 10;
-			obj.y += 10;
-			
-			objX = obj.x;
-			objY = obj.y;
-			pX = playerInfo.x;
-			pY = playerInfo.y;
-			
-			console.log("objX: "+objX+", objY: "+objY);
-			console.log("pX: "+pX+", pY: "+pY);
 		}
 		
 		function init() {
@@ -169,14 +159,7 @@
 				key: [[${playerInfo.key}]],
 				weapon: [[${playerInfo.weapon}]],
 				item: [[${playerInfo.item}]],
-				status: {
-					life: [[${playerInfo.status.life}]],
-					maxLife: [[${playerInfo.status.maxLife}]],
-					eLife: [[${playerInfo.status.eLife}]],
-					damage: [[${playerInfo.status.damage}]],
-					speed: [[${playerInfo.status.speed}]],
-					range: [[${playerInfo.status.range}]]
-				},
+				status: [[${playerInfo.status}]],
 				setBoxes: function() {
 					this.moveBox.x = this.x + 20;
 					this.moveBox.y = this.y + 40;
@@ -216,49 +199,67 @@
 			
 			for(var i = 0; i < doors.length; i++) {
 				if(doors[i] == 0) {
-					door[i] = null;
+					doorImgInfo[i] = null;
 					continue;
 				}
 				
-				var doorImg = document.createElement("img");
-				doorImg.setAttribute("width", "60");
-				doorImg.setAttribute("height", "60");
+				var doorInfo = {
+					x: 0,
+					y: 0,
+					cropX: i * 60,
+					cropY: 0
+				}
+				
+				switch(i) {
+				case 0:
+					doorInfo.x = cw/2 - 30; doorInfo.y = 0;
+					break;
+				case 1:
+					doorInfo.x = cw/2 - 30; doorInfo.y = ch - 60;
+					break;
+				case 2:
+					doorInfo.x = 0; doorInfo.y = ch/2 - 30;
+					break;
+				case 3:
+					doorInfo.x = cw - 60; doorInfo.y = ch/2 - 30;
+					break;
+				}
 				
 				if(doors[i] == 1) {
-					doorImg.setAttribute("src", "img/sprite/room/door_closed.png");
-					door[i] = doorImg;
+					doorInfo.cropY = 0;
+					doorImgInfo[i] = doorInfo;
 				} else if(doors[i] == 2) {
-					doorImg.setAttribute("src", "img/sprite/room/door_opened.png");
-					door[i] = doorImg;
+					doorInfo.cropY = 60;
+					doorImgInfo[i] = doorInfo;
 				}
 			}
 		}
 		
 		function obstacleSetting() {
-			if(obstacle.length > 0) {
-				obstacle.splice(0, obstacle.length);
+			if(obstacleImg.length > 0) {
+				obstacleImg.splice(0, obstacleImg.length);
 			}
 			
 			var obstacles = roomInfo[roomNo].obstacles;
 			
 			for(var i = 0; i < obstacles.length; i++) {
-				var obstacleImg = document.createElement("img");
-				obstacleImg.setAttribute("width", "60");
-				obstacleImg.setAttribute("height", "60");
+				var obs = document.createElement("img");
+				obs.setAttribute("width", "60");
+				obs.setAttribute("height", "60");
 				
 				switch(obstacles[i][2]) {
 				case 1:
-					obstacleImg.setAttribute("src", "img/sprite/room/stone.png");
+					obs.setAttribute("src", "img/sprite/room/stone.png");
 					break;
 				case 2:
-					obstacleImg.setAttribute("src", "img/sprite/room/pit_edge.png");
+					obs.setAttribute("src", "img/sprite/room/pit_edge.png");
 					break;
 				case 3:
-					obstacleImg.setAttribute("src", "img/sprite/room/stone_was_here.png");
+					obs.setAttribute("src", "img/sprite/room/stone_was_here.png");
 					break;
 				}
 
-				obstacle.push(obstacleImg);
+				obstacleImg.push(obs);
 			}
 		}
 		
@@ -343,7 +344,7 @@
 				
 				setTimeout(function() {
 					attackFlag = true;	
-				}, 250);
+				}, playerInfo.status.delay);
 			}
 		}
 		
@@ -439,14 +440,7 @@
 			
 			if(Math.abs(vx) < 50 && Math.abs(vy) < 50 && !chest.opened) {
 				roomInfo[roomNo].chest.opened = true;
-				var i = 0;
-				var itemGet = setInterval(function() {
-					ctx.drawImage(item, chest.itemCode*20, 0, 20, 20, cx + 20, cy - i * 10 + 20, 20, 20);
-					i++;
-					if(i == 8) {
-						clearInterval(itemGet);
-					}
-				}, 40);
+				getItem(chest.itemCode);
 			}
 		}
 		
@@ -487,7 +481,7 @@
 			var oy;
 			var vx;
 			var vy;
-			for(var i = 0; i < obstacle.length; i++) {
+			for(var i = 0; i < obstacleImg.length; i++) {
 				if(roomInfo[roomNo].obstacles[i][2] == 3) {
 					continue;
 				}
@@ -534,7 +528,7 @@
 			var oy;
 			var vx;
 			var vy;
-			for(var i = 0; i < obstacle.length; i++) {
+			for(var i = 0; i < obstacleImg.length; i++) {
 				if(roomInfo[roomNo].obstacles[i][2] != 1) {
 					continue;
 				}
@@ -555,7 +549,7 @@
 			var my = bombInfo.y + bomb.height/2;
 			var ox;
 			var oy;
-			for(var i = 0; i < obstacle.length; i++) {
+			for(var i = 0; i < obstacleImg.length; i++) {
 				if(roomInfo[roomNo].obstacles[i][2] != 1) {
 					continue;
 				}
@@ -603,18 +597,19 @@
 		}
 		
 		function drawImage() {
-			ctx.drawImage(room, 0, 0);
+			ctx.drawImage(roomImg, 0, 0);
 			
 			drawDoor();
 			
 			if(roomNo == 0) {
-				ctx.drawImage(floor, 60, 60);
+				ctx.drawImage(floorImg, 60, 60);
 			} else {
 				ctx.fillStyle = '#C3C3C3';
 				ctx.fillRect(60, 60, floor.width, floor.height);
 			}
 			
-			drawChestAndObstacle();
+			drawChest();
+			drawObstacle();
 			
 			if(!bombFlag) {
 				drawBomb();
@@ -623,12 +618,12 @@
 			var bodyCrop = Math.floor(directionCode/2);
 			if(playerInfo.invincibleFlag) {
 				ctx.globalAlpha = 0.5;
-				ctx.drawImage(player, bodyCrop * 80, 80, 80, 80, playerInfo.x, playerInfo.y, 80, 80);
-				ctx.drawImage(player, attackDirection * 80, 0, 80, 80, playerInfo.x, playerInfo.y, 80, 80);
+				ctx.drawImage(playerImg, bodyCrop * 80, 80, 80, 80, playerInfo.x, playerInfo.y, 80, 80);
+				ctx.drawImage(playerImg, attackDirection * 80, 0, 80, 80, playerInfo.x, playerInfo.y, 80, 80);
 				ctx.globalAlpha = 1;
 			} else {
-				ctx.drawImage(player, bodyCrop * 80, 80, 80, 80, playerInfo.x, playerInfo.y, 80, 80);
-				ctx.drawImage(player, attackDirection * 80, 0, 80, 80, playerInfo.x, playerInfo.y, 80, 80);
+				ctx.drawImage(playerImg, bodyCrop * 80, 80, 80, 80, playerInfo.x, playerInfo.y, 80, 80);
+				ctx.drawImage(playerImg, attackDirection * 80, 0, 80, 80, playerInfo.x, playerInfo.y, 80, 80);
 			}
 		}
 		
@@ -637,7 +632,7 @@
 			for(var i = 0; i < attacks.length; i++) {
 				if(attacks[i].isValid()) {
 					attacks[i].move();
-					ctx.drawImage(attack, attacks[i].x, attacks[i].y);
+					ctx.drawImage(attackImg, attacks[i].x, attacks[i].y);
 				} else {
 					remove.push(i);
 				}
@@ -648,86 +643,66 @@
 		}
 		
 		function drawDoor() {
-			for(var i = 0; i < door.length; i++) {
-				if(door[i]==null) {
+			for(var i = 0; i < doorImgInfo.length; i++) {
+				if(doorImgInfo[i]==null) {
 					continue;
 				}
-				
-				var dx;
-				var dy;
-				var deg;
-				
-				switch(i) {
-				case 0:
-					dx = cw/2 - 30; dy = 0;
-					deg = 0;
-					break;
-				case 1:
-					dx = cw/2 - 30; dy = ch - 60;
-					deg = 180;
-					break;
-				case 2:
-					dx = 0; dy = ch/2 - 30;
-					deg = 270;
-					break;
-				case 3:
-					dx = cw - 60; dy = ch/2 - 30;
-					deg = 90;
-					break;
-				}
-				ctx.save();
-				ctx.translate(dx+0.5*door[i].width, dy+0.5*door[i].height);
-				ctx.rotate(deg * Math.PI / 180);
-				ctx.translate(-(dx+0.5*door[i].width), -(dy+0.5*door[i].height));
-				ctx.drawImage(door[i], dx, dy);
-				ctx.restore();
+				ctx.drawImage(doorImg, doorImgInfo[i].cropX, doorImgInfo[i].cropY, 60, 60, doorImgInfo[i].x, doorImgInfo[i].y, 60, 60);
 			}
 		}
 		
-		function drawChestAndObstacle() {
+		function drawChest() {
 			var chest = roomInfo[roomNo].chest;
 			if(chest != null) {
-				var chestImg = document.createElement("img");
-				chestImg.setAttribute("width", "60");
-				chestImg.setAttribute("height", "60");
+				var cropX;
 				if(!chest.opened && !chest.locked) {
-					chestImg.src = "img/sprite/chest_closed.png";
+					cropX = 0;
 				} else if(chest.opened && !chest.locked) {
-					chestImg.src = "img/sprite/chest_opened.png";
+					cropX = 60;
 				}
-				ctx.drawImage(chestImg, chest.x * 60 + 60, chest.y * 60 + 60);
+				ctx.drawImage(chestImg, cropX, 0, 60, 60, chest.x * 60 + 60, chest.y * 60 + 60, 60, 60);
+				
+				if(chest.opened && chest.itemPop < 8) {
+					var cx = chest.x * 60 + 60;
+					var cy = chest.y * 60 + 60;
+					ctx.drawImage(item, chest.itemCode*20, 0, 20, 20, cx + 20, cy - chest.itemPop * 5 + 20, 20, 20);
+					chest.itemPop++;
+				}
 			}
-			for(var i = 0; i < obstacle.length; i++) {
-				ctx.drawImage(obstacle[i], roomInfo[roomNo].obstacles[i][0] * 60 + 60, roomInfo[roomNo].obstacles[i][1] * 60 + 60);
+		}
+		
+		function drawObstacle() {
+			for(var i = 0; i < obstacleImg.length; i++) {
+				ctx.drawImage(obstacleImg[i], roomInfo[roomNo].obstacles[i][0] * 60 + 60, roomInfo[roomNo].obstacles[i][1] * 60 + 60);
 			}
 		}
 		
 		function drawBomb() {
-			var bombCropX;
-			var bombCropY;
+			var cropX;
+			var cropY;
 			var width;
 			var height;
 			if(bombInfo.count < 50 && bombInfo.count%5 == 0 && bombInfo.count%10 == 0) {
-				bombCropX = 0;
-				bombCropY = 0;
+				cropX = 0;
+				cropY = 0;
 				width = 40;
 				height = 40;
 			} else if(bombInfo.count < 50 && bombInfo.count%5 == 0 && bombInfo.count%10 != 0) {
-				bombCropX = 40;
-				bombCropY = 0;
+				cropX = 40;
+				cropY = 0;
 				width = 40;
 				height = 40;
 			} else if(bombInfo.count == 50) {
-				bombCropX = 0;
-				bombCropY = 40;
+				cropX = 0;
+				cropY = 40;
 				width = 160;
 				height = 160;
 				bombInfo.x -= 60;
 				bombInfo.y -= 60;
 				obstacleDestroyCheck();
 			} else if(bombInfo.count == 55) {
-				bombCropX = 0;
-				bombCropY = 200;
+				cropX = 0;
+				cropY = 200;
 				width = 160;
 				height = 160;
 			} else if(bombInfo.count == 60) {
@@ -736,7 +711,7 @@
 				return;
 			}
 			
-			ctx.drawImage(bomb, bombCropX, bombCropY, width, height, bombInfo.x, bombInfo.y, width, height);
+			ctx.drawImage(bombImg, cropX, cropY, width, height, bombInfo.x, bombInfo.y, width, height);
 			
 			bombInfo.count++;
 		}
@@ -805,9 +780,9 @@
 				x += sliceX; y += sliceY;
 				rx += sliceX; ry += sliceY;
 				
-				ctx.drawImage(room, x, y);
+				ctx.drawImage(roomImg, x, y);
 				ctx.fillRect(x + 60, y + 60, floor.width, floor.height);
-				ctx.drawImage(room, rx, ry);
+				ctx.drawImage(roomImg, rx, ry);
 				ctx.fillRect(rx + 60, ry + 60, floor.width, floor.height);
 				
 				if(rx == 0 && ry == 0) {
@@ -874,21 +849,21 @@
 			}
 			ctx2.fillStyle = "#000000";
 			
-			ctx2.drawImage(item, 60, 0, 20, 20, 165, 5, 20, 20);
+			ctx2.drawImage(itemImg, 60, 0, 20, 20, 165, 5, 20, 20);
 			count = playerInfo.coin;
 			if(count<10) {
 				count = "0"+count;
 			}
 			ctx2.fillText("x " + count, 195, 20);
 			
-			ctx2.drawImage(item, 40, 0, 20, 20, 165, 30, 20, 20);
+			ctx2.drawImage(itemImg, 40, 0, 20, 20, 165, 30, 20, 20);
 			count = playerInfo.bomb;
 			if(count<10) {
 				count = "0"+count;
 			}
 			ctx2.fillText("x " + count, 195, 46);
 			
-			ctx2.drawImage(item, 80, 0, 20, 20, 165, 55, 20, 20);
+			ctx2.drawImage(itemImg, 80, 0, 20, 20, 165, 55, 20, 20);
 			count = playerInfo.key;
 			if(count<10) {
 				count = "0"+count;
@@ -906,10 +881,10 @@
 					break;
 				}
 				if(life>1) {
-					ctx2.drawImage(item, 0, 0, 20, 20, 25*hGap + 380, 30 + 25*vGap, 20, 20);
+					ctx2.drawImage(itemImg, 0, 0, 20, 20, 25*hGap + 380, 30 + 25*vGap, 20, 20);
 					life -= 2;
 				} else {
-					ctx2.drawImage(item, 20, 0, 20, 20, 25*hGap + 380, 30 + 25*vGap, 20, 20);
+					ctx2.drawImage(itemImg, 20, 0, 20, 20, 25*hGap + 380, 30 + 25*vGap, 20, 20);
 					life--;
 				}
 				hGap++;
@@ -923,10 +898,10 @@
 					break;
 				}
 				if(eLife>1) {
-					ctx2.drawImage(item, 100, 0, 20, 20, 25*hGap + 380, 30 + 25*vGap, 20, 20);
+					ctx2.drawImage(itemImg, 100, 0, 20, 20, 25*hGap + 380, 30 + 25*vGap, 20, 20);
 					eLife -= 2;
 				} else {
-					ctx2.drawImage(item, 120, 0, 20, 20, 25*hGap + 380, 30 + 25*vGap, 20, 20);
+					ctx2.drawImage(itemImg, 120, 0, 20, 20, 25*hGap + 380, 30 + 25*vGap, 20, 20);
 					eLife--;
 				}
 				hGap++;

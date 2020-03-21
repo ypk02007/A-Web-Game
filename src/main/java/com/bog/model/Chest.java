@@ -19,6 +19,6 @@ public class Chest {
 	
 	private boolean locked;
 	
-	private boolean hidden;
+	private int itemPop;
 	
 }
