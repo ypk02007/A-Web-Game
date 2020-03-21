@@ -1,6 +1,7 @@
 console.log("item.js has been included");
 
 function getItem(itemCode) {
+	var itemInfo = null;
 	switch(itemCode) {
 	case 0: // heart
 		if(playerInfo.status.life < playerInfo.status.maxLife) {
@@ -39,18 +40,25 @@ function getItem(itemCode) {
 	case 10: // hp up
 		playerInfo.status.maxLife += 2;
 		playerInfo.status.life += 2;
+		itemInfo = ["ENERGY DRINK", "HP UP"];
 		break;
 	case 11: // dmg up
 		playerInfo.status.damage++;
+		itemInfo = ["B.F.SWORD", "DMG UP"];
 		break;
 	case 12: // speed up
 		playerInfo.status.speed ++;
+		itemInfo = ["THREE-LINED SLIPPER", "SPEED UP"];
 		break;
 	case 13: // range up
 		playerInfo.status.range += 3;
+		itemInfo = ["MAGNIFIER", "RANGE UP"];
 		break;
 	case 14: // delay down
 		playerInfo.status.delay -= 25;
+		itemInfo = ["BIG RED BUTTON", "DELAY DOWN"];
 		break;
 	}
+	
+	return itemInfo;
 }

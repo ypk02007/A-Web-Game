@@ -10,12 +10,13 @@
 <body>
 	
 	<img id="item" width="140" height="20" src="img/item/item.png">
-	<img id="info_inventory" width="105" height="70" src="img/info/inventory.png">
+	<img id="info_inventory" width="105" height="70" src="img/item/inventory.png">
 	<img id="chest" width="240" height="60" src="img/sprite/chest.png">
 	<img id="door" width="240" height="480" src="img/sprite/room/door.png">
 	<img id="room" width="540" height="420" src="img/sprite/room/room.png">
 	<img id="floor" width="420" height="300" src="img/sprite/room/control_description.png">
 	<img id="player" width="320" height="160" src="img/character/gamjeon.png">
+	<img id="emotion" width="200" height="50" src="img/character/emotion/emotion.png">
 	<img id="attack" width="20" height="20" src="img/character/weapon/default.png">
 	<img id="bomb" width="160" height="360" src="img/sprite/bomb.png">
 	
@@ -41,6 +42,7 @@
 		var obstacleImg = [];
 		var floorImg = document.getElementById("floor");
 		var playerImg = document.getElementById("player");
+		var emotionImg = document.getElementById("emotion");
 		var attackImg = document.getElementById("attack");
 		var bombImg = document.getElementById("bomb");
 		
@@ -48,6 +50,7 @@
 		var roomNo = 0;
 		var playerInfo;
 		var bombInfo;
+		var itemGetObj = null;
 		
 		var drawInterval;
 		
@@ -440,7 +443,15 @@
 			
 			if(Math.abs(vx) < 50 && Math.abs(vy) < 50 && !chest.opened) {
 				roomInfo[roomNo].chest.opened = true;
-				getItem(chest.itemCode);
+				var itemInfo = getItem(chest.itemCode);
+				if(itemInfo != null) {
+					itemGetObj = {
+						itemCode: chest.itemCode,
+						itemName: itemInfo[0],
+						itemDesc: itemInfo[1],
+						count: 0
+					};
+				}
 			}
 		}
 		
@@ -662,11 +673,37 @@
 				}
 				ctx.drawImage(chestImg, cropX, 0, 60, 60, chest.x * 60 + 60, chest.y * 60 + 60, 60, 60);
 				
-				if(chest.opened && chest.itemPop < 8) {
-					var cx = chest.x * 60 + 60;
-					var cy = chest.y * 60 + 60;
-					ctx.drawImage(item, chest.itemCode*20, 0, 20, 20, cx + 20, cy - chest.itemPop * 5 + 20, 20, 20);
-					chest.itemPop++;
+				var cx = chest.x * 60 + 60;
+				var cy = chest.y * 60 + 60;
+				if(chest.opened && roomInfo[roomNo].chest.itemPop < 8) {
+					ctx.drawImage(item, chest.itemCode%10*20, Math.floor(chest.itemCode/10)*20, 20, 20, cx + 20, cy - roomInfo[roomNo].chest.itemPop * 5 + 20, 20, 20);
+					roomInfo[roomNo].chest.itemPop++;
+				}
+			}
+		}
+		
+		function drawItemMessage() {
+			if(itemGetObj != null) {
+				controlFlag = false;
+				
+				ctx.drawImage(emotionImg, 0, 0, 50, 50, playerInfo.x + 15, playerInfo.y - 30, 50, 50);
+				ctx.drawImage(itemImg, itemGetObj.itemCode%10*20, Math.floor(itemGetObj.itemCode/10)*20, 20, 20, playerInfo.x + 30, playerInfo.y - 20, 20, 20);
+				
+				ctx.globalAlpha = 0.9;
+				ctx.fillStyle = '#000000';
+				ctx.fillRect(0, 70, cw, 40);
+				ctx.fillRect(cw-200, ch-40, 200, 40);
+				ctx.globalAlpha = 1;
+				
+				ctx.fillStyle = '#FFFFFF';
+				ctx.font = '25px Arial Black';
+				ctx.fillText(itemGetObj.itemName, (cw - itemGetObj.itemName.length * 15)/2, 98);
+				ctx.fillText(itemGetObj.itemDesc, cw-188, ch-12);
+				
+				itemGetObj.count++;
+				if(itemGetObj.count == 100) {
+					itemGetObj = null;
+					controlFlag = true;
 				}
 			}
 		}
@@ -815,6 +852,8 @@
 			drawAttack();
 			
 			drawMonster();
+			
+			drawItemMessage();
 			
 			wallCheck();
 			

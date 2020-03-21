@@ -42,7 +42,7 @@ public class StageService {
 		int[] door0 = {0, 0, 2, 2};
 		int[] link0 = {0, 0, 1, 5};
 		roomInfo[0] = new Room(door0, link0, 2, map[0], setObstacles(1, 0));
-		Chest chestInfo = new Chest(1, 3, 0, false, false, 0);
+		Chest chestInfo = new Chest(1, 3, 14, false, false, 0);
 		roomInfo[0].setChest(chestInfo);
 		
 		int[] door1 = {1, 1, 0, 2};
