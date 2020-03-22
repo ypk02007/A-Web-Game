@@ -228,14 +228,41 @@
 					break;
 				}
 				
-				if(doors[i] == 1) {
-					doorInfo.cropY = 0;
-					doorImgInfo[i] = doorInfo;
-				} else if(doors[i] == 2) {
-					doorInfo.cropY = 60;
-					doorImgInfo[i] = doorInfo;
+				doorInfo.cropY = (doors[i]-1)*60;
+
+				doorImgInfo[i] = doorInfo;
+			}
+		}
+		
+		function doorLockSetting() {
+			var deadMonsterCount = 0;
+			var allMonstersDied = false;
+			if(roomInfo[roomNo].monsters != null) {
+				for(var i = 0; i < roomInfo[roomNo].monsters.length; i++) {
+					if(roomInfo[roomNo].monsters[i][0] == 0) {
+						deadMonsterCount++;
+					}
+				}
+				if(deadMonsterCount == roomInfo[roomNo].monsters.length) {
+					allMonstersDied = true;
 				}
 			}
+			if(monster.length == 0 || allMonstersDied) { // all monsters in the room are dead or no monster room
+				var doors = roomInfo[roomNo].doors;
+				for(var i = 0; i < doors.length; i++) {
+					if(doors[i]%2 == 1) {
+						roomInfo[roomNo].doors[i]++;
+					}
+				}
+			} else { // monsters exist, so doors are locked
+				var doors = roomInfo[roomNo].doors;
+				for(var i = 0; i < doors.length; i++) {
+					if(doors[i]%2 == 0 && doors[i] > 0) {
+						roomInfo[roomNo].doors[i]--;
+					}
+				}
+			}
+			doorSetting();
 		}
 		
 		function obstacleSetting() {
@@ -461,20 +488,20 @@
 			var dx = cw/2 - 30;
 			var dy = ch/2 - 30;
 			
-			if(playerInfo.moveBox.x >= dx && playerInfo.moveBox.x <= dx + 20 && playerInfo.moveBox.y < (ch/2-40) && doors[0] == 2) {
+			if(playerInfo.moveBox.x >= dx && playerInfo.moveBox.x <= dx + 20 && playerInfo.moveBox.y < (ch/2-40) && doors[0]%2 == 0) {
 				wall[0] = 40;
 				wall[1] = 60;
-			} else if(playerInfo.moveBox.x >= dx && playerInfo.moveBox.x <= dx + 20 && doors[1] == 2) {
+			} else if(playerInfo.moveBox.x >= dx && playerInfo.moveBox.x <= dx + 20 && doors[1]%2 == 0) {
 				wall[0] = 60;
 				wall[1] = 40;
 			} else {
 				wall[0] = 60;
 				wall[1] = 60;
 			}
-			if(playerInfo.moveBox.y >= dy && playerInfo.moveBox.y <= dy + 20 && playerInfo.moveBox.x < (cw/2-40) && doors[2] == 2) {
+			if(playerInfo.moveBox.y >= dy && playerInfo.moveBox.y <= dy + 20 && playerInfo.moveBox.x < (cw/2-40) && doors[2]%2 == 0) {
 				wall[2] = 40;
 				wall[3] = 60;
-			} else if(playerInfo.moveBox.y >= dy && playerInfo.moveBox.y <= dy + 20 && doors[3] == 2) {
+			} else if(playerInfo.moveBox.y >= dy && playerInfo.moveBox.y <= dy + 20 && doors[3]%2 == 0) {
 				wall[2] = 60;
 				wall[3] = 40;
 			} else {
@@ -780,9 +807,10 @@
 					roomInfo[linked[i]].visited = 1;
 				}
 			}
-			doorSetting();
-			obstacleSetting();
+			
 			monsterSetting();
+			obstacleSetting();
+			doorLockSetting();
 			
 			switch(dir) {
 			case 0:
@@ -834,6 +862,7 @@
 			for(var i = 0; i < monster.length; i++) {
 				if(monster[i].status.life <= 0) {
 					roomInfo[roomNo].monsters[i][0] = 0;
+					doorLockSetting();
 					continue;
 				}
 				monster[i].move(playerInfo.moveBox.x, playerInfo.moveBox.y);
