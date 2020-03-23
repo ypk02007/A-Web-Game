@@ -9,16 +9,17 @@
 </head>
 <body>
 	
-	<img id="item" width="140" height="20" src="img/item/item.png">
+	<img id="item" width="200" height="20" src="img/item/item.png">
 	<img id="info_inventory" width="105" height="70" src="img/item/inventory.png">
 	<img id="chest" width="240" height="60" src="img/sprite/chest.png">
-	<img id="door" width="240" height="480" src="img/sprite/room/door.png">
-	<img id="room" width="540" height="420" src="img/sprite/room/room.png">
-	<img id="floor" width="420" height="300" src="img/sprite/room/control_description.png">
+	<img id="door" width="240" height="480" src="img/sprite/door.png">
+	<img id="room" width="540" height="420" src="img/sprite/room.png">
+	<img id="floor" width="420" height="300" src="img/sprite/control_description.png">
 	<img id="player" width="320" height="160" src="img/character/gamjeon.png">
 	<img id="emotion" width="200" height="50" src="img/character/emotion/emotion.png">
 	<img id="attack" width="20" height="20" src="img/character/weapon/default.png">
 	<img id="bomb" width="160" height="360" src="img/sprite/bomb.png">
+	<img id="paused" width="400" height="350" src="img/bg/paused.png">
 	
 	<canvas id="info" width="540" height="80"></canvas>
 	<canvas id="canvas" width="540" height="420"></canvas>
@@ -45,6 +46,7 @@
 		var emotionImg = document.getElementById("emotion");
 		var attackImg = document.getElementById("attack");
 		var bombImg = document.getElementById("bomb");
+		var pausedImg = document.getElementById("paused");
 		
 		var roomInfo = [];
 		var roomNo = 0;
@@ -53,6 +55,7 @@
 		var itemGetObj = null;
 		
 		var drawInterval;
+		var pauseInterval;
 		
 		var wall = [60, 60, 60, 60]; // top, bottom, left, right
 		var attacks = [];
@@ -78,9 +81,24 @@
 		function keyDown(e) {
 			var key = e.keyCode;
 			
+			// ESC
+			
+			if(key==27) {
+				if(controlFlag) {
+					clearInterval(drawInterval);
+					pauseInterval = setInterval(pause, 20);
+				} else {
+					clearInterval(pauseInterval);
+					drawInterval = setInterval(draw, 20);
+					controlFlag = true;
+				}
+			}
+			
 			if(!controlFlag) {
 				return;
 			}
+			
+			// WASD
 			
 			if(key==87) {
 				pressed[0] = true;
@@ -93,6 +111,8 @@
 			} else if(key==68) {
 				pressed[3] = true;
 			}
+			
+			// UDLR
 			
 			if(key==38) {
 				attackSetting(0);
@@ -107,13 +127,12 @@
 				attackSetting(3);
 			}
 			
+			// C or Shift
+			
 			if(key==67 || key==16) {
 				bombSetting(playerInfo.moveBox.x, playerInfo.moveBox.y);
 			}
 			
-			if(key==69) {
-				showLife();
-			}
 		}
 
 		function keyUp(e) {
@@ -235,21 +254,12 @@
 		}
 		
 		function doorLockSetting() {
-			var deadMonsterCount = 0;
-			var allMonstersDied = false;
-			if(roomInfo[roomNo].monsters != null) {
-				for(var i = 0; i < roomInfo[roomNo].monsters.length; i++) {
-					if(roomInfo[roomNo].monsters[i][0] == 0) {
-						deadMonsterCount++;
-					}
-				}
-				if(deadMonsterCount == roomInfo[roomNo].monsters.length) {
-					allMonstersDied = true;
-				}
-			}
-			if(monster.length == 0 || allMonstersDied) { // all monsters in the room are dead or no monster room
+			if(monsterExtinctCheck()) { // all monsters in the room are dead or no monster room
 				var doors = roomInfo[roomNo].doors;
 				for(var i = 0; i < doors.length; i++) {
+					if(doors[i]==3 || doors[i]==7) {
+						continue;
+					}
 					if(doors[i]%2 == 1) {
 						roomInfo[roomNo].doors[i]++;
 					}
@@ -279,13 +289,13 @@
 				
 				switch(obstacles[i][2]) {
 				case 1:
-					obs.setAttribute("src", "img/sprite/room/stone.png");
+					obs.setAttribute("src", "img/sprite/stone.png");
 					break;
 				case 2:
-					obs.setAttribute("src", "img/sprite/room/pit_edge.png");
+					obs.setAttribute("src", "img/sprite/pit_edge.png");
 					break;
 				case 3:
-					obs.setAttribute("src", "img/sprite/room/stone_was_here.png");
+					obs.setAttribute("src", "img/sprite/stone_was_here.png");
 					break;
 				}
 
@@ -446,14 +456,37 @@
 		}
 		
 		function doorCheck() {
-			if(playerInfo.moveBox.y <= 40) {
+			var doors = roomInfo[roomNo].doors;
+			if(playerInfo.moveBox.y <= 40 && doors[0]%2==0 && doors[0]>0) {
 				moveRoom(0);
-			} else if(playerInfo.moveBox.y >= (ch-(40+40))) {
+				return;
+			} else if(playerInfo.moveBox.y >= (ch-(40+40)) && doors[1]%2==0 && doors[1]>0) {
 				moveRoom(1);
-			} else if(playerInfo.moveBox.x <= 40) {
+				return;
+			} else if(playerInfo.moveBox.x <= 40 && doors[2]%2==0 && doors[2]>0) {
 				moveRoom(2);
-			} else if(playerInfo.moveBox.x >= (cw-(40+40))) {
+				return;
+			} else if(playerInfo.moveBox.x >= (cw-(40+40)) && doors[3]%2==0 && doors[3]>0) {
 				moveRoom(3);
+				return;
+			}
+			
+			for(var i = 0; i < doorImgInfo.length; i++) { // unlock the door
+				if(playerInfo.key < 1 || !monsterExtinctCheck()) { // no key or monsters exist
+					break;
+				}
+				if(doorImgInfo[i] == null) {
+					continue;
+				}
+				var dx = doorImgInfo[i].x + 30;
+				var dy = doorImgInfo[i].y + 30;
+				var vx = playerInfo.moveBox.x + playerInfo.moveBox.width/2 - dx;
+				var vy = playerInfo.moveBox.y + playerInfo.moveBox.height/2 - dy;
+				
+				if(Math.abs(vx) <= 50 && Math.abs(vy) <= 50 && (doors[i]==3||doors[i]==7)) {
+					roomInfo[roomNo].doors[i]++;
+					playerInfo.key--;
+				}
 			}
 		}
 		
@@ -463,21 +496,49 @@
 				return;
 			}
 			
-			var cx = chest.x * 60 + 60;
-			var cy = chest.y * 60 + 60;
-			var vx = playerInfo.moveBox.x - cx;
-			var vy = playerInfo.moveBox.y - cy;
+			var cx = chest.x * 60 + 60 + 30;
+			var cy = chest.y * 60 + 60 + 30;
+			var vx = playerInfo.moveBox.x + playerInfo.moveBox.width/2 - cx;
+			var vy = playerInfo.moveBox.y + playerInfo.moveBox.height/2 - cy;
 			
 			if(Math.abs(vx) < 50 && Math.abs(vy) < 50 && !chest.opened) {
 				roomInfo[roomNo].chest.opened = true;
 				var itemInfo = getItem(chest.itemCode);
-				if(itemInfo != null) {
+				if(itemInfo != null && itemGetObj == null) {
 					itemGetObj = {
 						itemCode: chest.itemCode,
 						itemName: itemInfo[0],
 						itemDesc: itemInfo[1],
 						count: 0
 					};
+				}
+			}
+		}
+		
+		function itemGetCheck() {
+			var item = roomInfo[roomNo].items;
+			if(item == null) {
+				return;
+			}
+			
+			for(var i = 0; i < item.length; i++) {
+				var ix = item[i][0] * 60 + 60 + 30;
+				var iy = item[i][1] * 60 + 60 + 30;
+				var vx = playerInfo.moveBox.x + playerInfo.moveBox.width/2 - ix;
+				var vy = playerInfo.moveBox.y + playerInfo.moveBox.height/2 - iy;
+				
+				if(Math.abs(vx) < 40 && Math.abs(vy) < 40) {
+					var itemInfo = getItem(item[i][2]);
+					if(itemInfo != null && itemGetObj == null) {
+						itemGetObj = {
+							itemCode: item[i][2],
+							itemName: itemInfo[0],
+							itemDesc: itemInfo[1],
+							count: 0
+						};
+						roomInfo[roomNo].items.splice(i, 1);
+						return;
+					}
 				}
 			}
 		}
@@ -596,7 +657,7 @@
 				
 				if(Math.abs(mx-ox) < (bomb.width + 60)/2 && Math.abs(my-oy) < (bomb.height + 60)/2) {
 					roomInfo[roomNo].obstacles[i][2] = 3;
-					obstacle[i].src = "img/sprite/room/stone_was_here.png";
+					obstacle[i].src = "img/sprite/stone_was_here.png";
 				}
 				
 			}
@@ -634,6 +695,23 @@
 			return false;
 		}
 		
+		function monsterExtinctCheck() {
+			var deadMonsterCount = 0;
+			var allMonstersDied = false;
+			if(roomInfo[roomNo].monsters != null) {
+				for(var i = 0; i < roomInfo[roomNo].monsters.length; i++) {
+					if(roomInfo[roomNo].monsters[i][0] == 0) {
+						deadMonsterCount++;
+					}
+				}
+				if(deadMonsterCount == roomInfo[roomNo].monsters.length) {
+					allMonstersDied = true;
+				}
+			}
+			var result = (monster.length==0 || allMonstersDied);
+			return result;
+		}
+		
 		function drawImage() {
 			ctx.drawImage(roomImg, 0, 0);
 			
@@ -647,6 +725,7 @@
 			}
 			
 			drawChest();
+			drawItem();
 			drawObstacle();
 			
 			if(!bombFlag) {
@@ -703,15 +782,32 @@
 				var cx = chest.x * 60 + 60;
 				var cy = chest.y * 60 + 60;
 				if(chest.opened && roomInfo[roomNo].chest.itemPop < 8) {
-					ctx.drawImage(item, chest.itemCode%10*20, Math.floor(chest.itemCode/10)*20, 20, 20, cx + 20, cy - roomInfo[roomNo].chest.itemPop * 5 + 20, 20, 20);
+					ctx.drawImage(itemImg, chest.itemCode%10*20, Math.floor(chest.itemCode/10)*20, 20, 20, cx + 20, cy - roomInfo[roomNo].chest.itemPop * 5 + 20, 20, 20);
 					roomInfo[roomNo].chest.itemPop++;
 				}
 			}
 		}
 		
-		function drawItemMessage() {
+		function drawItem() {
+			var item = roomInfo[roomNo].items;
+			if(item != null) {
+				for(var i = 0; i < item.length; i++) {
+					var ix = item[i][0] * 60 + 60;
+					var iy = item[i][1] * 60 + 60;
+					ctx.drawImage(itemImg, 170, 0, 30, 20, ix + 15, iy + 25, 30, 20); // prop
+					ctx.drawImage(itemImg, item[i][2]%10*20, Math.floor(item[i][2]/10)*20, 20, 20, ix + 20, iy + 15, 20, 20); // item icon
+				}
+			}
+		}
+		
+		function drawItemGetMessage() {
 			if(itemGetObj != null) {
 				controlFlag = false;
+				
+				pressed[0] = false;
+				pressed[1] = false;
+				pressed[2] = false;
+				pressed[3] = false;
 				
 				ctx.drawImage(emotionImg, 0, 0, 50, 50, playerInfo.x + 15, playerInfo.y - 30, 50, 50);
 				ctx.drawImage(itemImg, itemGetObj.itemCode%10*20, Math.floor(itemGetObj.itemCode/10)*20, 20, 20, playerInfo.x + 30, playerInfo.y - 20, 20, 20);
@@ -882,7 +978,7 @@
 			
 			drawMonster();
 			
-			drawItemMessage();
+			drawItemGetMessage();
 			
 			wallCheck();
 			
@@ -891,6 +987,8 @@
 			doorCheck();
 			
 			chestCheck();
+			
+			itemGetCheck();
 		}
 		
 		function drawInfo() {
@@ -978,6 +1076,24 @@
 					hGap = 0;
 				}
 			}
+		}
+		
+		function pause() {
+			controlFlag = false;
+			
+			pressed[0] = false;
+			pressed[1] = false;
+			pressed[2] = false;
+			pressed[3] = false;
+			
+			ctx.clearRect(0, 0, cw, ch);
+			ctx.drawImage(pausedImg, 70, 35);
+			ctx.font = '20px Arial';
+			ctx.fillStyle = "#585858";
+			ctx.fillText(playerInfo.status.speed-4+"/7", 145, 150);
+			ctx.fillText((325-playerInfo.status.delay)/25+"/7", 240, 150);
+			ctx.fillText(playerInfo.status.damage+"/7", 320, 150);
+			ctx.fillText(playerInfo.status.range/4-4+"/7", 410, 150);
 		}
 		/*]]>*/
 	</script>

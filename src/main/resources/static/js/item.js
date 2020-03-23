@@ -37,24 +37,24 @@ function getItem(itemCode) {
 	case 6: // half electric heart
 		playerInfo.status.eLife++;
 		break;
-	case 10: // hp up
+	case 10:
 		playerInfo.status.maxLife += 2;
 		playerInfo.status.life += 2;
 		itemInfo = ["ENERGY DRINK", "HP UP"];
 		break;
-	case 11: // dmg up
+	case 11:
 		playerInfo.status.damage++;
-		itemInfo = ["B.F.SWORD", "DMG UP"];
+		itemInfo = ["B.F. SWORD", "DMG UP"];
 		break;
-	case 12: // speed up
+	case 12:
 		playerInfo.status.speed ++;
 		itemInfo = ["THREE-LINED SLIPPER", "SPEED UP"];
 		break;
-	case 13: // range up
-		playerInfo.status.range += 3;
+	case 13:
+		playerInfo.status.range += 4;
 		itemInfo = ["MAGNIFIER", "RANGE UP"];
 		break;
-	case 14: // delay down
+	case 14:
 		playerInfo.status.delay -= 25;
 		itemInfo = ["BIG RED BUTTON", "DELAY DOWN"];
 		break;

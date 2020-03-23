@@ -19,6 +19,8 @@ public class Room {
 	
 	private int[][] monsters; // {monsterCode, x, y}
 	
+	private int[][] items; // {itemCode, gridX, gridY}
+	
 	private Chest chest;
 
 	public Room(int[] doors, int[] linked, int visited, int[] map, int[][] obstacles) {
