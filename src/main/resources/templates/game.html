@@ -24,8 +24,9 @@
 	<canvas id="info" width="540" height="80"></canvas>
 	<canvas id="canvas" width="540" height="420"></canvas>
 	
-	<script type="text/javascript" src="js/monster.js"></script>
 	<script type="text/javascript" src="js/item.js"></script>
+	<script type="text/javascript" src="js/monster.js"></script>
+	<script type="text/javascript" src="js/sound.js"></script>
 	<script th:inline="javascript">
 		/*<![CDATA[*/
 		var canvas = document.getElementById("canvas");
@@ -116,15 +117,19 @@
 			
 			if(key==38) {
 				attackSetting(0);
+				playSE("attack");
 			}
 			if(key==40) {
 				attackSetting(1);
+				playSE("attack");
 			}
 			if(key==37) {
 				attackSetting(2);
+				playSE("attack");
 			}
 			if(key==39) {
 				attackSetting(3);
+				playSE("attack");
 			}
 			
 			// C or Shift
@@ -484,8 +489,10 @@
 				var vy = playerInfo.moveBox.y + playerInfo.moveBox.height/2 - dy;
 				
 				if(Math.abs(vx) <= 50 && Math.abs(vy) <= 50 && (doors[i]==3||doors[i]==7)) {
+					playSE("unlock")
 					roomInfo[roomNo].doors[i]++;
 					playerInfo.key--;
+					doorLockSetting();
 				}
 			}
 		}
@@ -803,6 +810,10 @@
 		function drawItemGetMessage() {
 			if(itemGetObj != null) {
 				controlFlag = false;
+				
+				if(itemGetObj.count == 0) {
+					playSE("get_item");
+				}
 				
 				pressed[0] = false;
 				pressed[1] = false;

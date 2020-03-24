@@ -45,13 +45,13 @@ public class StageService {
 		Chest chestInfo = new Chest(1, 3, 1, false, false, 0);
 		roomInfo[0].setChest(chestInfo);
 		
-		int[] door1 = {3, 1, 0, 2};
+		int[] door1 = {3, 7, 0, 2};
 		int[] link1 = {2, 3, 0, 0};
 		int[][] monster1 = {{1, 180 ,120}};
 		roomInfo[1] = new Room(door1, link1, 1, map[1], setObstacles(1, 1));
 		roomInfo[1].setMonsters(monster1);
 		
-		int[] door2 = {0, 1, 1, 0};
+		int[] door2 = {0, 1, 3, 0};
 		int[] link2 = {0, 1, 10, 0};
 		roomInfo[2] = new Room(door2, link2, 0, map[2], setObstacles(1, 2));
 		

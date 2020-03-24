@@ -38,6 +38,7 @@ function keyDown(e) {
 	var key = e.keyCode;
 
 	if (key == 13 && !prologueFlag) {
+		//playBGM("title");
 		prologueFlag = true;
 		bg.src = "img/bg/subway.png";
 		setInterval(draw, 20);
