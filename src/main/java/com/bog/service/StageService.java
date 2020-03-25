@@ -69,7 +69,7 @@ public class StageService {
 		roomInfo[5] = new Room(door5, link5, 1, map[5], setObstacles(1, 5));
 		roomInfo[5].setMonsters(monster5);
 		
-		int[] door6 = {0, 1, 0, 7};
+		int[] door6 = {0, 1, 0, 9};
 		int[] link6 = {0, 5, 0, 7};
 		int[][] item6 = {{1, 1, 10}, {1, 3, 11}};
 		roomInfo[6] = new Room(door6, link6, 0, map[6], setObstacles(1, 6));

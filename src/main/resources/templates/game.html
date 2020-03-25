@@ -15,17 +15,19 @@
 	<img id="door" width="240" height="480" src="img/sprite/door.png">
 	<img id="room" width="540" height="420" src="img/sprite/room.png">
 	<img id="floor" width="420" height="300" src="img/sprite/control_description.png">
-	<img id="player" width="320" height="160" src="img/character/gamjeon.png">
+	<img id="player" width="400" height="160" src="img/character/gamjeon.png">
 	<img id="emotion" width="200" height="50" src="img/character/emotion/emotion.png">
 	<img id="attack" width="20" height="20" src="img/character/weapon/default.png">
 	<img id="bomb" width="160" height="360" src="img/sprite/bomb.png">
 	<img id="paused" width="400" height="350" src="img/bg/paused.png">
+	<img id="spotlight" width="200" height="300" src="img/sprite/spotlight.png">
 	
 	<canvas id="info" width="540" height="80"></canvas>
 	<canvas id="canvas" width="540" height="420"></canvas>
 	
 	<script type="text/javascript" src="js/item.js"></script>
 	<script type="text/javascript" src="js/monster.js"></script>
+	<script type="text/javascript" src="js/boss.js"></script>
 	<script type="text/javascript" src="js/sound.js"></script>
 	<script th:inline="javascript">
 		/*<![CDATA[*/
@@ -117,19 +119,19 @@
 			
 			if(key==38) {
 				attackSetting(0);
-				playSE("attack");
+				//playSE("attack");
 			}
 			if(key==40) {
 				attackSetting(1);
-				playSE("attack");
+				//playSE("attack");
 			}
 			if(key==37) {
 				attackSetting(2);
-				playSE("attack");
+				//playSE("attack");
 			}
 			if(key==39) {
 				attackSetting(3);
-				playSE("attack");
+				//playSE("attack");
 			}
 			
 			// C or Shift
@@ -489,7 +491,7 @@
 				var vy = playerInfo.moveBox.y + playerInfo.moveBox.height/2 - dy;
 				
 				if(Math.abs(vx) <= 50 && Math.abs(vy) <= 50 && (doors[i]==3||doors[i]==7)) {
-					playSE("unlock")
+					//playSE("unlock")
 					roomInfo[roomNo].doors[i]++;
 					playerInfo.key--;
 					doorLockSetting();
@@ -812,7 +814,7 @@
 				controlFlag = false;
 				
 				if(itemGetObj.count == 0) {
-					playSE("get_item");
+					//playSE("get_item");
 				}
 				
 				pressed[0] = false;
@@ -887,6 +889,10 @@
 			bombInfo.count++;
 		}
 		
+		function drawEncountingBoss() {
+			clearInterval()
+		}
+		
 		function moveRoom(dir) {
 			controlFlag = false;
 			clearInterval(drawInterval);
@@ -900,6 +906,7 @@
 			var sliceY;
 			var change;
 			
+			var bossRoomCheck = roomInfo[roomNo].doors[dir];
 			roomNo = roomInfo[roomNo].linked[dir];
 			
 			var doors = roomInfo[roomNo].doors;
@@ -928,7 +935,7 @@
 			case 1:
 				sliceX = 0; sliceY = -20;
 				rx = 0; ry = ch;
-				playerInfo.x = cw/2 + 40; playerInfo.y = 60;
+				playerInfo.x = cw/2 - 40; playerInfo.y = 60;
 				break;
 			case 2:
 				sliceX = 20; sliceY = 0;
@@ -944,25 +951,65 @@
 			
 			playerInfo.setBoxes();
 			
-			ctx.fillStyle = '#C3C3C3';
-			
-			var interval = setInterval(function() {
-				ctx.clearRect(0, 0, cw, ch);
-				
-				x += sliceX; y += sliceY;
-				rx += sliceX; ry += sliceY;
-				
-				ctx.drawImage(roomImg, x, y);
-				ctx.fillRect(x + 60, y + 60, floor.width, floor.height);
-				ctx.drawImage(roomImg, rx, ry);
-				ctx.fillRect(rx + 60, ry + 60, floor.width, floor.height);
-				
-				if(rx == 0 && ry == 0) {
-					clearInterval(interval);
-					drawInterval = setInterval(draw, 20);
-					controlFlag = true;
-				}
-			}, 20);
+			if(bossRoomCheck == 10) { // entered boss room
+				var i = 0;
+				var boss = bossInit();
+				var playerX = -80;
+				var playerY = 250;
+				var bossX = cw;
+				var bossY = 170;
+				ctx.fillStyle = '#FFFFFF';
+				var spotlight = document.getElementById("spotlight");
+				var interval = setInterval(function() {
+					ctx.clearRect(0, 0, cw, ch);
+					
+					if(i < 7) {
+						playerX += 20;
+						bossX -= 20;
+					}
+					if(i > 10) {
+						ctx.font = '20px Arial Black';
+						ctx.fillText("GAMJEON", 50, 40);
+						ctx.fillText(boss.name, 330, 40);
+						ctx.font = '30px Arial Black';
+						ctx.fillText("VS.", 250, 35);
+					}
+					
+					ctx.globalAlpha = 0.7;
+					ctx.drawImage(spotlight, 0, 60);
+					ctx.drawImage(spotlight, 340, 60);
+					ctx.globalAlpha = 1;
+					ctx.drawImage(boss.img.img, boss.img.cropX, boss.img.cropY, boss.hitBox.width, boss.hitBox.height, bossX, bossY, boss.hitBox.width, boss.hitBox.height);
+					ctx.drawImage(playerImg, 320, 0, 80, 80, playerX, playerY, 80, 80);
+					
+					i++;
+					
+					if(i > 80) {
+						clearInterval(interval);
+						//drawInterval = setInterval(draw, 20);
+						//controlFlag = true;
+					}
+				}, 20);
+			} else {
+				ctx.fillStyle = '#C3C3C3';
+				var interval = setInterval(function() {
+					ctx.clearRect(0, 0, cw, ch);
+						
+					x += sliceX; y += sliceY;
+					rx += sliceX; ry += sliceY;
+						
+					ctx.drawImage(roomImg, x, y);
+					ctx.fillRect(x + 60, y + 60, floor.width, floor.height);
+					ctx.drawImage(roomImg, rx, ry);
+					ctx.fillRect(rx + 60, ry + 60, floor.width, floor.height);
+						
+					if(rx == 0 && ry == 0) {
+						clearInterval(interval);
+						drawInterval = setInterval(draw, 20);
+						controlFlag = true;
+					}
+				}, 20);
+			}
 		}
 		
 		function drawMonster() {
