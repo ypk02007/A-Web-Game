@@ -8,11 +8,11 @@ function bossInit() {
 	switch (rand) {
 	case 0:
 		boss = subwayAgent();
-		boss.img = bossImgInit("agent.png", "320", "160");
+		boss.img = bossImgInit("agent.png", "960", "220");
 		break;
 	default:
 		boss = subwayAgent();
-		boss.img = bossImgInit("agent.png", "320", "160");
+		boss.img = bossImgInit("agent.png", "960", "220");
 	}
 	
 	return boss;
@@ -47,16 +47,47 @@ function subwayAgent() {
 		},
 		dir : 1,
 		img : null,
-		srcCode : 0,
-		changeDirCount : 0,
+		patternCounter : 0,
 		status : {
 			life : 20,
 			damage : 1,
 			speed : 2,
 			range : 0
 		},
+		attack : [],
 		move : function() {
-			if(this.moveBox.y >= 280) {
+			if(this.patternCounter == 0) {
+				var atk = {
+					x : this.x + 30,
+					y : this.y + 60,
+					mx : -4,
+					my : 2,
+					cropX : 0,
+					cropY : 160,
+					size : 60
+				}
+				this.attack.push(atk);
+				console.log("attack added");
+			}
+			this.patternCounter++;
+			
+			for(var i = 0; i < this.attack.length; i++) {
+				this.attack[i].x += this.attack[i].mx;
+				this.attack[i].y += this.attack[i].my;
+				this.attack[i].cropX += 60;
+				if(this.attack[i].cropX >= 240) {
+					this.attack[i].cropX = 0;
+				}
+				if(this.attack[i].x < 0) {
+					this.attack.splice(i, 1);
+					console.log("attack removed");
+				}
+			}
+			
+			if(this.patternCounter > 100) {
+				this.patternCounter = 0;
+			}
+			/*if(this.moveBox.y >= 280) {
 				this.dir = 0;
 			} else if(this.moveBox.y <= 60) {
 				this.dir = 1;
@@ -67,7 +98,8 @@ function subwayAgent() {
 			} else {
 				this.y += this.status.speed;
 			}
-			this.setBoxes();
+			this.setBoxes();*/
+			
 		},
 		setBoxes : function() {
 			this.moveBox.x = this.x;
