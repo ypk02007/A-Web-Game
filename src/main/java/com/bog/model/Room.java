@@ -22,12 +22,15 @@ public class Room {
 	private int[][] items; // {itemCode, gridX, gridY}
 	
 	private Chest chest;
+	
+	private boolean bossRoom;
 
-	public Room(int[] doors, int[] linked, int visited, int[] map, int[][] obstacles) {
+	public Room(int[] doors, int[] linked, int visited, int[] map, int[][] obstacles, boolean bossRoom) {
 		this.doors = doors;
 		this.linked = linked;
 		this.visited = visited;
 		this.map = map;
 		this.obstacles = obstacles;
+		this.bossRoom = bossRoom;
 	}
 }

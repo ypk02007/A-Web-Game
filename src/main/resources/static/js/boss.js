@@ -23,12 +23,7 @@ function bossImgInit(src, width, height) {
 	img.setAttribute("src", "img/boss/"+src);
 	img.setAttribute("width", width);
 	img.setAttribute("height", height);
-	var bossImg = {
-		img : img,
-		cropX : 0,
-		cropY : 0,
-	};
-	return bossImg;
+	return img;
 }
 
 function subwayAgent() {
@@ -36,6 +31,8 @@ function subwayAgent() {
 		name : "SUBWAY AGENT",
 		x : 230,
 		y : 130,
+		cropX : 0,
+		cropY : 0,
 		moveBox : {
 			x : 0,
 			y : 0,
@@ -66,9 +63,9 @@ function subwayAgent() {
 			}
 			
 			if(this.dir == 0) {
-				this.x -= this.status.speed;
+				this.y -= this.status.speed;
 			} else {
-				this.x += this.status.speed;
+				this.y += this.status.speed;
 			}
 			this.setBoxes();
 		},
@@ -83,7 +80,6 @@ function subwayAgent() {
 		},
 		damaged : function(dmg) {
 			this.status.life -= dmg;
-			console.log("boss damaged");
 		}
 	}
 	

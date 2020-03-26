@@ -56,6 +56,8 @@
 		var playerInfo;
 		var bombInfo;
 		var itemGetObj = null;
+		var monster = [];
+		var bossInfo = null;
 		
 		var drawInterval;
 		var pauseInterval;
@@ -70,9 +72,7 @@
 		
 		var controlFlag = true;
 		var attackFlag = true;
-		var bombFlag = true;
-		
-		var monster = [];
+		var bombFlag = true;		
 		
 		document.addEventListener("keydown", keyDown, false);
 		document.addEventListener("keyup", keyUp, false);
@@ -690,10 +690,10 @@
 			var boundY;
 			
 			for(var i = 0; i < monster.length; i++) {
-				vx = monster[i].moveBox.x - bx;
-				vy = monster[i].moveBox.y - by;
-				boundX = monster[i].moveBox.width/2 + 10;
-				boundY = monster[i].moveBox.height/2 + 10;
+				vx = (monster[i].hitBox.x + monster[i].hitBox.width/2) - (bx + 10);
+				vy = (monster[i].hitBox.y + monster[i].hitBox.height/2) - (by + 10);
+				boundX = monster[i].hitBox.width/2 + 10;
+				boundY = monster[i].hitBox.height/2 + 10;
 				
 				if(Math.abs(vx) < boundX && Math.abs(vy) < boundY) {
 					monster[i].damaged(playerInfo.status.damage);
@@ -701,6 +701,20 @@
 					return true;
 				}
 			}
+			
+			if(bossInfo != null) {
+				vx = (bossInfo.hitBox.x + bossInfo.hitBox.width/2) - (bx + 10);
+				vy = (bossInfo.hitBox.y + bossInfo.hitBox.height/2) - (by + 10);
+				boundX = bossInfo.hitBox.width/2 + 10;
+				boundY = bossInfo.hitBox.height/2 + 10;
+				
+				if(Math.abs(vx) < boundX && Math.abs(vy) < boundY) {
+					bossInfo.damaged(playerInfo.status.damage);
+					console.log("boss damaged");
+					return true;
+				}
+			}
+			
 			return false;
 		}
 		
@@ -717,7 +731,7 @@
 					allMonstersDied = true;
 				}
 			}
-			var result = (monster.length==0 || allMonstersDied);
+			var result = ((monster.length==0 || allMonstersDied) && bossInfo == null);
 			return result;
 		}
 		
@@ -906,7 +920,6 @@
 			var sliceY;
 			var change;
 			
-			var bossRoomCheck = roomInfo[roomNo].doors[dir];
 			roomNo = roomInfo[roomNo].linked[dir];
 			
 			var doors = roomInfo[roomNo].doors;
@@ -922,10 +935,6 @@
 				}
 			}
 			
-			monsterSetting();
-			obstacleSetting();
-			doorLockSetting();
-			
 			switch(dir) {
 			case 0:
 				sliceX = 0; sliceY = 20;
@@ -940,18 +949,18 @@
 			case 2:
 				sliceX = 20; sliceY = 0;
 				rx = -cw; ry = 0;
-				playerInfo.x = cw - 140; playerInfo.y = ch/2 - 40;
+				playerInfo.x = cw - 140; playerInfo.y = ch/2 - 50;
 				break;
 			case 3:
 				sliceX = -20; sliceY = 0;
 				rx = cw; ry = 0;
-				playerInfo.x = 60; playerInfo.y = playerInfo.y = ch/2 - 40;
+				playerInfo.x = 60; playerInfo.y = playerInfo.y = ch/2 - 50;
 				break;
 			}
 			
 			playerInfo.setBoxes();
 			
-			if(bossRoomCheck == 10) { // entered boss room
+			if(roomInfo[roomNo].bossRoom) { // entered boss room
 				var i = 0;
 				var boss = bossInit();
 				var playerX = -80;
@@ -979,15 +988,19 @@
 					ctx.drawImage(spotlight, 0, 60);
 					ctx.drawImage(spotlight, 340, 60);
 					ctx.globalAlpha = 1;
-					ctx.drawImage(boss.img.img, boss.img.cropX, boss.img.cropY, boss.hitBox.width, boss.hitBox.height, bossX, bossY, boss.hitBox.width, boss.hitBox.height);
+					ctx.drawImage(boss.img, boss.cropX, boss.cropY, boss.hitBox.width, boss.hitBox.height, bossX, bossY, boss.hitBox.width, boss.hitBox.height);
 					ctx.drawImage(playerImg, 320, 0, 80, 80, playerX, playerY, 80, 80);
 					
 					i++;
 					
 					if(i > 80) {
 						clearInterval(interval);
-						//drawInterval = setInterval(draw, 20);
-						//controlFlag = true;
+						drawInterval = setInterval(draw, 20);
+						bossInfo = boss;
+						monsterSetting();
+						obstacleSetting();
+						doorLockSetting();
+						controlFlag = true;
 					}
 				}, 20);
 			} else {
@@ -1006,6 +1019,9 @@
 					if(rx == 0 && ry == 0) {
 						clearInterval(interval);
 						drawInterval = setInterval(draw, 20);
+						monsterSetting();
+						obstacleSetting();
+						doorLockSetting();
 						controlFlag = true;
 					}
 				}, 20);
@@ -1013,8 +1029,8 @@
 		}
 		
 		function drawMonster() {
-			for(var i = 0; i < monster.length; i++) {
-				if(monster[i].status.life <= 0) {
+			for(var i = 0; i < monster.length; i++) { // monsters exist
+				if(monster[i].status.life <= 0) { // a monster died
 					roomInfo[roomNo].monsters[i][0] = 0;
 					doorLockSetting();
 					continue;
@@ -1022,6 +1038,16 @@
 				monster[i].move(playerInfo.moveBox.x, playerInfo.moveBox.y);
 				ctx.drawImage(monster[i].img, monster[i].x, monster[i].y);
 				playerCollisionCheck(monster[i]);
+			}
+			if(bossInfo != null) { // boss exists
+				if(bossInfo.status.life <= 0) { // the boss died
+					bossInfo = null;
+					roomInfo[roomNo].bossRoom = false;
+					doorLockSetting();
+				} else {
+					bossInfo.move();
+					ctx.drawImage(bossInfo.img, bossInfo.cropX, bossInfo.cropY, bossInfo.hitBox.width, bossInfo.hitBox.height, bossInfo.x, bossInfo.y, bossInfo.hitBox.width, bossInfo.hitBox.height);
+				}
 			}
 		}
 		

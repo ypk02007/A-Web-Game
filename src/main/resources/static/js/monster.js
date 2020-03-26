@@ -111,8 +111,6 @@ function knuckles(img, x, y) {
 		},
 		damaged: function(dmg) {
 			this.status.life -= dmg;
-			var seSource = (this.status.life > 0) ? "hit" : "kill";
-			playSE(seSource);
 		}
 	};
 
