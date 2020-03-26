@@ -1047,6 +1047,7 @@
 				} else {
 					bossInfo.move();
 					ctx.drawImage(bossInfo.img, bossInfo.cropX, bossInfo.cropY, bossInfo.hitBox.width, bossInfo.hitBox.height, bossInfo.x, bossInfo.y, bossInfo.hitBox.width, bossInfo.hitBox.height);
+					playerCollisionCheck(bossInfo);
 					for(var i = 0; i < bossInfo.attack.length; i++) {
 						ctx.drawImage(bossInfo.img, bossInfo.attack[i].cropX, bossInfo.attack[i].cropY, bossInfo.attack[i].size, bossInfo.attack[i].size, bossInfo.attack[i].x, bossInfo.attack[i].y, bossInfo.attack[i].size, bossInfo.attack[i].size);
 					}

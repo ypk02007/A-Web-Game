@@ -2,7 +2,7 @@ console.log("boss.js has been included");
 
 function bossInit() {
 	const numOfBoss = 2;
-	var rand = Math.floor(Math.random) * numOfBoss;
+	var rand = Math.floor(Math.random() * numOfBoss);
 
 	var boss;
 	switch (rand) {
@@ -14,6 +14,8 @@ function bossInit() {
 		boss = subwayAgent();
 		boss.img = bossImgInit("agent.png", "960", "220");
 	}
+	
+	console.log("rand: " + rand);
 	
 	return boss;
 }
@@ -47,7 +49,8 @@ function subwayAgent() {
 		},
 		dir : 1,
 		img : null,
-		patternCounter : 0,
+		counter : 0,
+		pattern : 0,
 		status : {
 			life : 20,
 			damage : 1,
@@ -56,50 +59,45 @@ function subwayAgent() {
 		},
 		attack : [],
 		move : function() {
-			if(this.patternCounter == 0) {
-				var atk = {
-					x : this.x + 30,
-					y : this.y + 60,
-					mx : -4,
-					my : 2,
-					cropX : 0,
-					cropY : 160,
-					size : 60
+			switch(this.counter) {
+			case 0:
+				this.cropX = 0;
+				this.pattern = Math.floor(Math.random() * 2);
+				console.log("pattern: " + this.pattern);
+				break;
+			case 10:
+				this.cropX = (this.pattern == 0) ? 320 : 640;
+				break;
+			case 20:
+				if(this.pattern == 0) {
+					this.cropX = 400;
 				}
-				this.attack.push(atk);
-				console.log("attack added");
+				break;
+			case 70:
+				this.cropX = (this.pattern == 0) ? 0 : 720;
+				this.attackPattern();
+				break;
 			}
-			this.patternCounter++;
+
+			this.counter++;
 			
-			for(var i = 0; i < this.attack.length; i++) {
+			for(var i = this.attack.length-1; i >= 0; i--) {
 				this.attack[i].x += this.attack[i].mx;
 				this.attack[i].y += this.attack[i].my;
-				this.attack[i].cropX += 60;
-				if(this.attack[i].cropX >= 240) {
-					this.attack[i].cropX = 0;
+				if(this.pattern == 0) {
+					this.attack[i].cropX += 60;
+					if(this.attack[i].cropX >= 240) {
+						this.attack[i].cropX = 0;
+					}
 				}
 				if(this.attack[i].x < 0) {
 					this.attack.splice(i, 1);
-					console.log("attack removed");
 				}
 			}
 			
-			if(this.patternCounter > 100) {
-				this.patternCounter = 0;
+			if(this.counter > 170) {
+				this.counter = 0;
 			}
-			/*if(this.moveBox.y >= 280) {
-				this.dir = 0;
-			} else if(this.moveBox.y <= 60) {
-				this.dir = 1;
-			}
-			
-			if(this.dir == 0) {
-				this.y -= this.status.speed;
-			} else {
-				this.y += this.status.speed;
-			}
-			this.setBoxes();*/
-			
 		},
 		setBoxes : function() {
 			this.moveBox.x = this.x;
@@ -107,8 +105,32 @@ function subwayAgent() {
 			this.hitBox.x = this.x;
 			this.hitBox.y = this.y;
 		},
-		changeImage : function() {
-
+		attackPattern : function() {
+			if(this.pattern == 0) {
+				var atk = {
+					x : this.x + 30,
+					y : this.y + 30,
+					mx : -4,
+					my : 2,
+					cropX : 0,
+					cropY : 160,
+					size : 60
+				}
+				this.attack.push(atk);
+			} else {
+				for(var i = 0; i < 3; i++) {
+					var atk = {
+						x : this.x + 20,
+						y : this.y + 60,
+						mx : -4,
+						my : -2 + i * 2,
+						cropX : 240 + i * 40,
+						cropY : 160,
+						size : 40
+					}
+					this.attack.push(atk);
+				}
+			}
 		},
 		damaged : function(dmg) {
 			this.status.life -= dmg;
