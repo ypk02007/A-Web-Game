@@ -63,10 +63,9 @@ function subwayAgent() {
 			}
 			
 			switch(this.counter) {
-			case 40:
-				this.pattern = Math.floor(Math.random() * 2);
-				break;
 			case 50:
+				this.pattern = Math.floor(Math.random() * 2);
+				
 				var dir = (playerInfo.moveBox.x < this.moveBox.x) ? 0 : 1;
 				this.cropX = (this.pattern == 0) ? 320 : 640;
 				this.cropX += dir * 160;
@@ -158,26 +157,64 @@ function subwayAgent() {
 			this.hitBox.y = this.y;
 		},
 		attackPattern : function() {
-			if(this.pattern == 0) {
-				var pmx = playerInfo.moveBox.x;
-				var pmy = playerInfo.moveBox.y;
+			if(this.pattern == 0) { // throw a bar
+				var pmx = playerInfo.moveBox.x + 30;
+				var pmy = playerInfo.moveBox.y + 30;
+				var vx = pmx - (this.x + 60);
+				var vy = pmy - (this.y + 60);
+				var mx;
+				var my;
+				if(Math.abs(vx) > Math.abs(vy)) {
+					mx = (vx > 0) ? 7 : -7;
+					my = vy * mx / vx;
+				} else {
+					my = (vy > 0) ? 7 : -7;
+					mx = vx * my / vy;
+				}
 				var atk = {
 					x : this.x + 30,
 					y : this.y + 30,
-					mx : -4,
-					my : 2,
+					mx : mx,
+					my : my,
 					cropX : 0,
 					cropY : 160,
 					size : 60
 				}
 				this.attack.push(atk);
-			} else {
+			} else { // expel bad passengers
+				var pmx = playerInfo.moveBox.x;
+				var pmy = playerInfo.moveBox.y;
+				var mx = [];
+				var my = [];
+				
+				if(pmy + 60 < this.y && pmx + 30 > this.x - 75 && pmx + 30 < this.x + 75 + this.hitBox.width) {
+					for(var i = 0; i < 3; i++) {
+						mx.push(-2 + i * 2);
+						my.push(-6);
+					}
+				} else if(pmy > this.y + this.hitBox.height && pmx + 30 > this.x - 75 && pmx + 30 < this.x + 75 + this.hitBox.width) {
+					for(var i = 0; i < 3; i++) {
+						mx.push(-2 + i * 2);
+						my.push(6);
+					}
+				} else if(pmx + 30 < this.x + this.hitBox.height/2) {
+					for(var i = 0; i < 3; i++) {
+						mx.push(-6);
+						my.push(-2 + i * 2);
+					}
+				} else {
+					for(var i = 0; i < 3; i++) {
+						mx.push(6);
+						my.push(-2 + i * 2);
+					}
+				}
+				
 				for(var i = 0; i < 3; i++) {
 					var atk = {
 						x : this.x + 20,
 						y : this.y + 60,
-						mx : -4,
-						my : -2 + i * 2,
+						mx : mx[i],
+						my : my[i],
 						cropX : 240 + i * 40,
 						cropY : 160,
 						size : 40

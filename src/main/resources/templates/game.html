@@ -368,19 +368,19 @@
 					},
 					isValid: function() {
 						if(monsterDamagedCheck(this.x, this.y)) {
-							console.log("attack removed by monster");
+							//console.log("attack removed by monster");
 							return false;
 						} if(!obstacleAttackCheck(this.dir, this.x, this.y, 20)) {
-							console.log("attack removed by obstacle");
+							//console.log("attack removed by obstacle");
 							return false;
 						} else if(this.x < wall[2] || this.x > cw - wall[3]) {
-							console.log("attack removed by wall left or wall right");
+							//console.log("attack removed by wall left or wall right");
 							return false;
 						} else if(this.y < wall[0] || this.y > ch - wall[1]) {
-							console.log("attack removed by wall top or wall bottom");
+							//console.log("attack removed by wall top or wall bottom");
 							return false;
 						} else if(this.rangeCount == playerInfo.status.range) {
-							console.log("attack removed because of range limit");
+							//console.log("attack removed because of range limit");
 							return false;
 						} else {
 							return true;
@@ -405,7 +405,6 @@
 					count: 0
 				};
 				bombInfo = bombInfoInit;
-				console.log("bomb start");
 			}
 		}
 		
@@ -672,14 +671,14 @@
 			}
 		}
 		
-		function playerCollisionCheck(m) {
-			var vx = (playerInfo.hitBox.x + playerInfo.hitBox.width/2) - (m.hitBox.x + m.hitBox.width/2);
-			var vy = (playerInfo.hitBox.y + playerInfo.hitBox.height/2) - (m.hitBox.y + m.hitBox.height/2);
-			var boundX = (playerInfo.hitBox.width + m.hitBox.width)/2;
-			var boundY = (playerInfo.hitBox.height + m.hitBox.height)/2;
+		function playerCollisionCheck(objX, objY, objWidth, objHeight, dmg) { // monster, boss and their attack
+			var vx = (playerInfo.hitBox.x + playerInfo.hitBox.width/2) - (objX + objWidth/2);
+			var vy = (playerInfo.hitBox.y + playerInfo.hitBox.height/2) - (objY + objHeight/2);
+			var boundX = (playerInfo.hitBox.width + objWidth)/2;
+			var boundY = (playerInfo.hitBox.height + objHeight)/2;
 			
 			if(Math.abs(vx) < boundX && Math.abs(vy) < boundY) {
-				playerInfo.damaged(m.status.damage);
+				playerInfo.damaged(dmg);
 			}
 		}
 		
@@ -894,7 +893,6 @@
 				height = 160;
 			} else if(bombInfo.count == 60) {
 				bombFlag = true;
-				console.log("bomb end");
 				return;
 			}
 			
@@ -1037,7 +1035,7 @@
 				}
 				monster[i].move();
 				ctx.drawImage(monster[i].img, monster[i].x, monster[i].y);
-				playerCollisionCheck(monster[i]);
+				playerCollisionCheck(monster[i].hitBox.x, monster[i].hitBox.y, monster[i].hitBox.width, monster[i].hitBox.height, monster[i].status.damage);
 			}
 			if(bossInfo != null) { // boss exists
 				if(bossInfo.status.life <= 0) { // the boss died
@@ -1047,9 +1045,10 @@
 				} else {
 					bossInfo.act();
 					ctx.drawImage(bossInfo.img, bossInfo.cropX, bossInfo.cropY, bossInfo.hitBox.width, bossInfo.hitBox.height, bossInfo.x, bossInfo.y, bossInfo.hitBox.width, bossInfo.hitBox.height);
-					playerCollisionCheck(bossInfo);
+					playerCollisionCheck(bossInfo.hitBox.x, bossInfo.hitBox.y, bossInfo.hitBox.width, bossInfo.hitBox.height, bossInfo.status.damage);
 					for(var i = 0; i < bossInfo.attack.length; i++) {
 						ctx.drawImage(bossInfo.img, bossInfo.attack[i].cropX, bossInfo.attack[i].cropY, bossInfo.attack[i].size, bossInfo.attack[i].size, bossInfo.attack[i].x, bossInfo.attack[i].y, bossInfo.attack[i].size, bossInfo.attack[i].size);
+						playerCollisionCheck(bossInfo.attack[i].x, bossInfo.attack[i].y, bossInfo.attack[i].size, bossInfo.attack[i].size, bossInfo.status.damage);
 					}
 				}
 			}
