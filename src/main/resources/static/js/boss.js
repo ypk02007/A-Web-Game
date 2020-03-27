@@ -47,41 +47,48 @@ function subwayAgent() {
 			width : 80,
 			height : 160
 		},
-		dir : 1,
 		img : null,
 		counter : 0,
 		pattern : 0,
 		status : {
 			life : 20,
 			damage : 1,
-			speed : 2,
+			speed : 5,
 			range : 0
 		},
 		attack : [],
-		move : function() {
+		act : function() {
+			if(this.counter <= 40 && this.counter%2 == 0) {
+				this.move();
+			}
+			
 			switch(this.counter) {
-			case 0:
-				this.cropX = 0;
+			case 40:
 				this.pattern = Math.floor(Math.random() * 2);
-				console.log("pattern: " + this.pattern);
 				break;
-			case 10:
+			case 50:
+				var dir = (playerInfo.moveBox.x < this.moveBox.x) ? 0 : 1;
 				this.cropX = (this.pattern == 0) ? 320 : 640;
+				this.cropX += dir * 160;
 				break;
-			case 20:
+			case 60:
 				if(this.pattern == 0) {
-					this.cropX = 400;
+					var dir = (playerInfo.moveBox.x < this.moveBox.x) ? 0 : 1;
+					this.cropX = 400 + dir * 160;
 				}
 				break;
-			case 70:
+			case 110:
+				var dir = (playerInfo.moveBox.x < this.moveBox.x) ? 0 : 1;
 				this.cropX = (this.pattern == 0) ? 0 : 720;
+				this.cropX += dir * 160;
 				this.attackPattern();
 				break;
 			}
 
 			this.counter++;
 			
-			for(var i = this.attack.length-1; i >= 0; i--) {
+			var remove = [];
+			for(var i = 0; i < this.attack.length; i++) {
 				this.attack[i].x += this.attack[i].mx;
 				this.attack[i].y += this.attack[i].my;
 				if(this.pattern == 0) {
@@ -90,13 +97,58 @@ function subwayAgent() {
 						this.attack[i].cropX = 0;
 					}
 				}
-				if(this.attack[i].x < 0) {
-					this.attack.splice(i, 1);
+				if(this.attack[i].x < -this.attack[i].size || this.attack[i].x > 540 || this.attack[i].y < -this.attack[i].size || this.attack[i].y > 420) {
+					remove.push(i);
 				}
 			}
+			remove = remove.sort(function(a, b) {
+				return b-a;
+			});
+			for(var i = 0; i < remove.length; i++) {
+				this.attack.splice(remove[i], 1);
+			}
 			
-			if(this.counter > 170) {
+			if(this.counter > 210) {
 				this.counter = 0;
+			}
+		},
+		move : function() {
+			var mx = this.moveBox.x;
+			var my = this.moveBox.y;
+			var pmx = playerInfo.moveBox.x;
+			var pmy = playerInfo.moveBox.y;
+			var roomEdge = [30, 360-this.moveBox.height, 60, 480-this.moveBox.width];
+			if(pmx > mx + 5) {
+				if(this.cropX == 160) {
+					this.cropX = 240;
+				} else {
+					this.cropX = 160;
+				}
+				if(mx < roomEdge[3]) {
+					this.x += this.status.speed;
+					this.setBoxes();
+				}
+			} else if(pmx < mx - 5) {
+				if(this.cropX == 0) {
+					this.cropX = 80;
+				} else {
+					this.cropX = 0;
+				}
+				if(mx > roomEdge[2]) {
+					this.x -= this.status.speed;
+					this.setBoxes();
+				}
+			}
+			if(pmy > my + 5) {
+				if(my < roomEdge[1]) {
+					this.y += this.status.speed;
+					this.setBoxes();
+				}
+			} else if(pmy < my - 5) {
+				if(my > roomEdge[0]) {
+					this.y -= this.status.speed;
+					this.setBoxes();
+				}
 			}
 		},
 		setBoxes : function() {
@@ -107,6 +159,8 @@ function subwayAgent() {
 		},
 		attackPattern : function() {
 			if(this.pattern == 0) {
+				var pmx = playerInfo.moveBox.x;
+				var pmy = playerInfo.moveBox.y;
 				var atk = {
 					x : this.x + 30,
 					y : this.y + 30,

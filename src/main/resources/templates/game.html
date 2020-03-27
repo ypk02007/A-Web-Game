@@ -1035,7 +1035,7 @@
 					doorLockSetting();
 					continue;
 				}
-				monster[i].move(playerInfo.moveBox.x, playerInfo.moveBox.y);
+				monster[i].move();
 				ctx.drawImage(monster[i].img, monster[i].x, monster[i].y);
 				playerCollisionCheck(monster[i]);
 			}
@@ -1045,7 +1045,7 @@
 					roomInfo[roomNo].bossRoom = false;
 					doorLockSetting();
 				} else {
-					bossInfo.move();
+					bossInfo.act();
 					ctx.drawImage(bossInfo.img, bossInfo.cropX, bossInfo.cropY, bossInfo.hitBox.width, bossInfo.hitBox.height, bossInfo.x, bossInfo.y, bossInfo.hitBox.width, bossInfo.hitBox.height);
 					playerCollisionCheck(bossInfo);
 					for(var i = 0; i < bossInfo.attack.length; i++) {

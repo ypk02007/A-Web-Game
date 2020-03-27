@@ -55,9 +55,11 @@ function knuckles(img, x, y) {
 			speed: 2,
 			range: 0
 		},
-		move: function(pmx, pmy) {
+		move: function() {
 			var mx = this.moveBox.x;
 			var my = this.moveBox.y;
+			var pmx = playerInfo.moveBox.x;
+			var pmy = playerInfo.moveBox.y;
 			var roomEdge = [40, 360-this.moveBox.height, 40, 480-this.moveBox.width];
 			if(pmx > mx + 5) {
 				this.dirX = 3;
@@ -142,9 +144,11 @@ function sonic(img, x, y) {
 			speed: 2,
 			range: 0
 		},
-		move: function(pmx, pmy) {
+		move: function() {
 			var mx = this.moveBox.x;
 			var my = this.moveBox.y;
+			var pmx = playerInfo.moveBox.x;
+			var pmy = playerInfo.moveBox.y;
 			var roomEdge = [40, 360-this.moveBox.height, 40, 480-this.moveBox.width];
 			
 			if(!this.superSonicFlag) {
@@ -225,9 +229,11 @@ function hog(img, x, y) {
 			speed: 1,
 			range: 0
 		},
-		move: function(pmx, pmy) {
+		move: function() {
 			var mx = this.moveBox.x;
 			var my = this.moveBox.y;
+			var pmx = playerInfo.moveBox.x;
+			var pmy = playerInfo.moveBox.y;
 			var roomEdge = [40, 360-this.moveBox.height, 40, 480-this.moveBox.width];
 			if(pmx > mx + 5) {
 				this.dirX = 3;
