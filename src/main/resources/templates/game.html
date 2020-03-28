@@ -137,7 +137,6 @@
 			
 			if(key==67 || key==16) {
 				bombSetting(playerInfo.moveBox.x, playerInfo.moveBox.y);
-				console.log("eLife: " + playerInfo.status.elecLife);
 			}
 			
 		}
@@ -197,8 +196,8 @@
 				},
 				damaged: function(dmg) {
 					if(!this.invincibleFlag) {
-						if(this.status.eLife > 0) {
-							this.status.eLife -= dmg;
+						if(this.status.elecLife > 0) {
+							this.status.elecLife -= dmg;
 						} else {
 							this.status.life -= dmg;
 						}
@@ -215,8 +214,6 @@
 					}
 				}
 			};
-			
-			console.log(playerInfo);
 			
 			playerInfo.setBoxes();
 			doorSetting();
@@ -1029,8 +1026,8 @@
 					doorLockSetting();
 					continue;
 				}
-				monster[i].move();
-				ctx.drawImage(monster[i].img, monster[i].x, monster[i].y);
+				monster[i].act();
+				ctx.drawImage(monster[i].img, monster[i].cropX, monster[i].cropY, monster[i].width, monster[i].height, monster[i].x, monster[i].y, monster[i].width, monster[i].height);
 				playerCollisionCheck(monster[i].hitBox.x, monster[i].hitBox.y, monster[i].hitBox.width, monster[i].hitBox.height, monster[i].status.damage);
 			}
 			if(bossInfo != null) { // boss exists

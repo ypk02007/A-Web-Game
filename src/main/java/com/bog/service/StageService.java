@@ -53,25 +53,30 @@ public class StageService {
 			roomInfo[i] = new Room(door[i], link[i], visited, map[i], setObstacles(stage, i), false);
 		}
 		
-		roomInfo = specialRoomSetting(stage, roomInfo);
+		roomInfo = setSpecialRoom(stage, roomInfo);
+		
+		int[][] monster1 = {{1, 180, 180}};
+		roomInfo[1].setMonsters(monster1);
 		
 		return roomInfo;
 	}
 	
 	private int[][] setObstacles(int stage, int roomNo) { // x, y, code
-		if(stage == 1 && roomNo == 1) {
-			int[][] obstacles = {{1, 1, 1}, {5, 1, 1}, {1, 3, 1}, {5, 3, 1}};
-			return obstacles;
-		} else if(stage == 1 && roomNo == 5) {
-			int[][] obstacles = {{1, 1, 2}, {5, 1, 2}, {2, 2, 2}, {4, 2, 2}, {1, 3, 2}, {5, 3, 2}};
-			return obstacles;
-		} else {
-			int[][] obstacles = {};
-			return obstacles;
+		if(stage == 1) {
+			switch(roomNo) {
+			case 1:
+				int[][] obstacles101 = {{1, 1, 1}, {5, 1, 1}, {1, 3, 1}, {5, 3, 1}};
+				return obstacles101;
+			case 5:
+				int[][] obstacles105 = {{1, 1, 2}, {5, 1, 2}, {2, 2, 2}, {4, 2, 2}, {1, 3, 2}, {5, 3, 2}};
+				return obstacles105;
+			}
 		}
+		int[][] obstacles_d = {};
+		return obstacles_d;
 	}
 	
-	private Room[] specialRoomSetting(int stage, Room[] room) {
+	private Room[] setSpecialRoom(int stage, Room[] room) {
 		int max = 0;
 		if(stage == 1) {
 			max = 4;
@@ -189,19 +194,19 @@ public class StageService {
 		
 		switch(sp[3]) { // determine key room
 		case 0:
-			int[][] item0 = {{3, 2, 5}};
+			int[][] item0 = {{3, 2, 4}};
 			room[10].setItems(item0);
 			break;
 		case 1:
-			int[][] item1 = {{3, 2, 5}};
+			int[][] item1 = {{3, 2, 4}};
 			room[4].setItems(item1);
 			break;
 		case 2:
-			int[][] item2 = {{3, 2, 5}};
+			int[][] item2 = {{3, 2, 4}};
 			room[7].setItems(item2);
 			break;
 		case 3:
-			int[][] item3 = {{3, 2, 5}};
+			int[][] item3 = {{3, 2, 4}};
 			room[9].setItems(item3);
 			break;
 		}

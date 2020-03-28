@@ -6,22 +6,16 @@ function monsterInit(monsterCode, x, y) {
 	
 	switch(monsterCode) {
 	case 1:
-		img.setAttribute("width", "60");
-		img.setAttribute("height", "60");
-		img.setAttribute("src", "img/monster/knuckles_0.png");
-		monster = knuckles(img, x, y);
+		monster = knuckles(x, y);
+		monster.img = monsterImgInit("knuckles.png", "240", "60");
 		break;
 	case 2:
-		img.setAttribute("width", "60");
-		img.setAttribute("height", "60");
-		img.setAttribute("src", "img/monster/sonic_0.png");
-		monster = sonic(img, x, y);
+		monster = sonic(x, y);
+		monster.img = monsterImgInit("sonic.png", "240", "60");
 		break;
 	case 3:
-		img.setAttribute("width", "40");
-		img.setAttribute("height", "60");
-		img.setAttribute("src", "img/monster/hog.png");
-		monster = hog(img, x, y);
+		monster = hog(x, y);
+		monster.img = monsterImgInit("hog.png", "40", "60");
 		break;
 	}
 	
@@ -29,10 +23,22 @@ function monsterInit(monsterCode, x, y) {
 	return monster;
 }
 
-function knuckles(img, x, y) {
+function monsterImgInit(src, width, height) {
+	var img = document.createElement("img");
+	img.setAttribute("src", "img/monster/"+src);
+	img.setAttribute("width", width);
+	img.setAttribute("height", height);
+	return img;
+}
+
+function knuckles(x, y) {
 	var monster = {
 		x: x,
 		y: y,
+		cropX: 0,
+		cropY: 0,
+		width: 60,
+		height: 60,
 		moveBox: {
 			x: 0,
 			y: 0,
@@ -45,15 +51,38 @@ function knuckles(img, x, y) {
 			width: 50,
 			height: 50
 		},
-		dir: 3,
-		img: img,
-		srcCode: 0,
-		changeDirCount: 0,
+		img: null,
 		status: {
 			life: 4,
 			damage: 1,
 			speed: 2,
 			range: 0
+		},
+		counter : 0,
+		act: function() {
+			if(this.counter<6) {
+				this.move();
+			}
+			
+			if((playerInfo.moveBox.x + playerInfo.moveBox.width/2) < (this.moveBox.x + this.moveBox.width/2)) {
+				if(this.cropX == 0) {
+					this.cropX = 60;
+				} else {
+					this.cropX = 0;
+				}
+			} else {
+				if(this.cropX == 120) {
+					this.cropX = 180;
+				} else {
+					this.cropX = 120;
+				}
+			}
+			
+			this.counter++;
+			
+			if(this.counter>=18) {
+				this.counter = 0;
+			}
 		},
 		move: function() {
 			var mx = this.moveBox.x;
@@ -62,54 +91,33 @@ function knuckles(img, x, y) {
 			var pmy = playerInfo.moveBox.y;
 			var roomEdge = [40, 360-this.moveBox.height, 40, 480-this.moveBox.width];
 			if(pmx > mx + 5) {
-				this.dirX = 3;
-				if(mx < roomEdge[3] && obstacleCheck(this.dirX, this)) {
+				if(mx < roomEdge[3] && obstacleCheck(3, this)) {
 					this.x += this.status.speed;
 					this.setBoxes();
 				}
 			} else if(pmx < mx - 5) {
-				this.dirX = 2;
-				if(mx > roomEdge[2] && obstacleCheck(this.dirX, this)) {
+				if(mx > roomEdge[2] && obstacleCheck(2, this)) {
 					this.x -= this.status.speed;
 					this.setBoxes();
 				}
 			}
 			if(pmy > my + 5) {
-				this.dirY = 1;
-				if(my < roomEdge[1] && obstacleCheck(this.dirY, this)) {
+				if(my < roomEdge[1] && obstacleCheck(1, this)) {
 					this.y += this.status.speed;
 					this.setBoxes();
 				}
 			} else if(pmy < my - 5) {
-				this.dirY = 0;
-				if(my > roomEdge[0] && obstacleCheck(this.dirY, this)) {
+				if(my > roomEdge[0] && obstacleCheck(0, this)) {
 					this.y -= this.status.speed;
 					this.setBoxes();
 				}
 			}
-			this.changeImage();
 		},
 		setBoxes: function() {
 			this.moveBox.x = this.x + 10;
 			this.moveBox.y = this.y + 20;
 			this.hitBox.x = this.x + 10;
 			this.hitBox.y = this.y + 10;
-		},
-		changeImage: function() {
-			this.changeDirCount++;
-			if(this.changeDirCount == 8) {
-				this.srcCode++;
-				if(this.srcCode > 1) {
-					this.srcCode = 0;
-				}
-				switch(this.srcCode) {
-				case 0:
-					this.img.src = "img/monster/knuckles_0.png"; break;
-				case 1:
-					this.img.src = "img/monster/knuckles_1.png"; break;
-				}
-				this.changeDirCount = 0;
-			}
 		},
 		damaged: function(dmg) {
 			this.status.life -= dmg;
@@ -185,8 +193,8 @@ function sonic(img, x, y) {
 		setBoxes: function() {
 			this.moveBox.x = this.x + 10;
 			this.moveBox.y = this.y + 20;
-			this.hitBox.x = this.x + 10;
-			this.hitBox.y = this.y + 10;
+			this.hitBox.x = this.x + 5;
+			this.hitBox.y = this.y + 5;
 		},
 		changeImage: function(pmx, pmy, mx, my) {
 			var vx = pmx - mx;
@@ -205,10 +213,14 @@ function sonic(img, x, y) {
 	return monster;
 }
 
-function hog(img, x, y) {
+function hog(x, y) {
 	var monster = {
 		x: x,
 		y: y,
+		cropX: 0,
+		cropY: 0,
+		width: 40,
+		height: 60,
 		moveBox: {
 			x: 0,
 			y: 0,
@@ -228,6 +240,9 @@ function hog(img, x, y) {
 			damage: 1,
 			speed: 1,
 			range: 0
+		},
+		act: function() {
+			this.move();
 		},
 		move: function() {
 			var mx = this.moveBox.x;
