@@ -54,7 +54,7 @@
 		var roomInfo = [];
 		var roomNo = 0;
 		var playerInfo;
-		var bombInfo;
+		var bombInfo = null;
 		var itemGetObj = null;
 		var monster = [];
 		var bossInfo = null;
@@ -71,8 +71,7 @@
 		var attackDirection = 1;
 		
 		var controlFlag = true;
-		var attackFlag = true;
-		var bombFlag = true;		
+		var attackFlag = true;	
 		
 		document.addEventListener("keydown", keyDown, false);
 		document.addEventListener("keyup", keyUp, false);
@@ -138,6 +137,7 @@
 			
 			if(key==67 || key==16) {
 				bombSetting(playerInfo.moveBox.x, playerInfo.moveBox.y);
+				console.log("eLife: " + playerInfo.status.elecLife);
 			}
 			
 		}
@@ -215,6 +215,8 @@
 					}
 				}
 			};
+			
+			console.log(playerInfo);
 			
 			playerInfo.setBoxes();
 			doorSetting();
@@ -367,7 +369,7 @@
 						this.rangeCount++;
 					},
 					isValid: function() {
-						if(monsterDamagedCheck(this.x, this.y)) {
+						if(monsterDamagedCheck(this.x, this.y, 20, playerInfo.status.damage)) {
 							//console.log("attack removed by monster");
 							return false;
 						} if(!obstacleAttackCheck(this.dir, this.x, this.y, 20)) {
@@ -396,12 +398,15 @@
 		}
 		
 		function bombSetting(x, y) {
-			if(bombFlag && playerInfo.bomb > 0) {
-				bombFlag = false;
+			if(bombInfo == null && playerInfo.bomb > 0) {
 				playerInfo.bomb--;
 				var bombInfoInit = {
 					x: x,
 					y: y,
+					cropX: 0,
+					cropY: 0,
+					width: 40,
+					height: 40,
 					count: 0
 				};
 				bombInfo = bombInfoInit;
@@ -547,6 +552,7 @@
 						roomInfo[roomNo].items.splice(i, 1);
 						return;
 					}
+					roomInfo[roomNo].items.splice(i, 1);
 				}
 			}
 		}
@@ -651,7 +657,7 @@
 			return true;
 		}
 		
-		function obstacleDestroyCheck() {
+		function explosionCheck() {
 			var mx = bombInfo.x + bomb.width/2;
 			var my = bombInfo.y + bomb.height/2;
 			var ox;
@@ -665,10 +671,10 @@
 				
 				if(Math.abs(mx-ox) < (bomb.width + 60)/2 && Math.abs(my-oy) < (bomb.height + 60)/2) {
 					roomInfo[roomNo].obstacles[i][2] = 3;
-					obstacle[i].src = "img/sprite/stone_was_here.png";
+					obstacleImg[i].src = "img/sprite/stone_was_here.png";
 				}
-				
 			}
+			monsterDamagedCheck(bombInfo.x, bombInfo.y, 160, 10);
 		}
 		
 		function playerCollisionCheck(objX, objY, objWidth, objHeight, dmg) { // monster, boss and their attack
@@ -682,33 +688,33 @@
 			}
 		}
 		
-		function monsterDamagedCheck(bx, by) {
+		function monsterDamagedCheck(bx, by, size, dmg) {
 			var vx;
 			var vy;
 			var boundX;
 			var boundY;
 			
 			for(var i = 0; i < monster.length; i++) {
-				vx = (monster[i].hitBox.x + monster[i].hitBox.width/2) - (bx + 10);
-				vy = (monster[i].hitBox.y + monster[i].hitBox.height/2) - (by + 10);
-				boundX = monster[i].hitBox.width/2 + 10;
-				boundY = monster[i].hitBox.height/2 + 10;
+				vx = (monster[i].hitBox.x + monster[i].hitBox.width/2) - (bx + size/2);
+				vy = (monster[i].hitBox.y + monster[i].hitBox.height/2) - (by + size/2);
+				boundX = monster[i].hitBox.width/2 + size/2;
+				boundY = monster[i].hitBox.height/2 + size/2;
 				
 				if(Math.abs(vx) < boundX && Math.abs(vy) < boundY) {
-					monster[i].damaged(playerInfo.status.damage);
+					monster[i].damaged(dmg);
 					console.log("monster damaged");
 					return true;
 				}
 			}
 			
 			if(bossInfo != null) {
-				vx = (bossInfo.hitBox.x + bossInfo.hitBox.width/2) - (bx + 10);
-				vy = (bossInfo.hitBox.y + bossInfo.hitBox.height/2) - (by + 10);
-				boundX = bossInfo.hitBox.width/2 + 10;
-				boundY = bossInfo.hitBox.height/2 + 10;
+				vx = (bossInfo.hitBox.x + bossInfo.hitBox.width/2) - (bx + size/2);
+				vy = (bossInfo.hitBox.y + bossInfo.hitBox.height/2) - (by + size/2);
+				boundX = bossInfo.hitBox.width/2 + size/2;
+				boundY = bossInfo.hitBox.height/2 + size/2;
 				
 				if(Math.abs(vx) < boundX && Math.abs(vy) < boundY) {
-					bossInfo.damaged(playerInfo.status.damage);
+					bossInfo.damaged(dmg);
 					console.log("boss damaged");
 					return true;
 				}
@@ -750,7 +756,7 @@
 			drawItem();
 			drawObstacle();
 			
-			if(!bombFlag) {
+			if(bombInfo != null) {
 				drawBomb();
 			}
 			
@@ -864,39 +870,29 @@
 		}
 		
 		function drawBomb() {
-			var cropX;
-			var cropY;
-			var width;
-			var height;
 			if(bombInfo.count < 50 && bombInfo.count%5 == 0 && bombInfo.count%10 == 0) {
-				cropX = 0;
-				cropY = 0;
-				width = 40;
-				height = 40;
+				bombInfo.cropX = 0;
+				bombInfo.cropY = 0;
 			} else if(bombInfo.count < 50 && bombInfo.count%5 == 0 && bombInfo.count%10 != 0) {
-				cropX = 40;
-				cropY = 0;
-				width = 40;
-				height = 40;
+				bombInfo.cropX = 40;
+				bombInfo.cropY = 0;
 			} else if(bombInfo.count == 50) {
-				cropX = 0;
-				cropY = 40;
-				width = 160;
-				height = 160;
+				bombInfo.cropX = 0;
+				bombInfo.cropY = 40;
+				bombInfo.width = 160;
+				bombInfo.height = 160;
 				bombInfo.x -= 60;
 				bombInfo.y -= 60;
-				obstacleDestroyCheck();
+				explosionCheck();
 			} else if(bombInfo.count == 55) {
-				cropX = 0;
-				cropY = 200;
-				width = 160;
-				height = 160;
+				bombInfo.cropX = 0;
+				bombInfo.cropY = 200;
 			} else if(bombInfo.count == 60) {
-				bombFlag = true;
+				bombInfo = null;
 				return;
 			}
 			
-			ctx.drawImage(bombImg, cropX, cropY, width, height, bombInfo.x, bombInfo.y, width, height);
+			ctx.drawImage(bombImg, bombInfo.cropX, bombInfo.cropY, bombInfo.width, bombInfo.height, bombInfo.x, bombInfo.y, bombInfo.width, bombInfo.height);
 			
 			bombInfo.count++;
 		}
@@ -1082,7 +1078,7 @@
 			var inventory = document.getElementById("info_inventory");
 			var count;
 			var life = playerInfo.status.life;
-			var eLife = playerInfo.status.eLife;
+			var eLife = playerInfo.status.elecLife;
 			
 			ctx2.clearRect(0, 0, infoCanvas.width, infoCanvas.height);
 			

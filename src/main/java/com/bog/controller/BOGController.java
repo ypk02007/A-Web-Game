@@ -41,7 +41,7 @@ public class BOGController {
 		PlayerInfo playerInfo = stageService.playerInfoInit("gamjeon");
 		model.addAttribute("playerInfo", playerInfo);
 		
-		Room[] roomInfo = stageService.roomInfoInit();
+		Room[] roomInfo = stageService.roomInfoInit(1);
 		model.addAttribute("roomInfo", roomInfo);
 		
 		String stage = stageService.goToStage(posted);

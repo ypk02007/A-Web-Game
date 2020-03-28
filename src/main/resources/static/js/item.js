@@ -32,10 +32,10 @@ function getItem(itemCode) {
 		}
 		break;
 	case 5: // electric heart
-		playerInfo.status.eLife += 2;
+		playerInfo.status.elecLife += 2;
 		break;
 	case 6: // half electric heart
-		playerInfo.status.eLife++;
+		playerInfo.status.elecLife++;
 		break;
 	case 10:
 		playerInfo.status.maxLife += 2;
@@ -47,8 +47,8 @@ function getItem(itemCode) {
 		itemInfo = ["B.F. SWORD", "DMG UP"];
 		break;
 	case 12:
-		playerInfo.status.speed ++;
-		itemInfo = ["THREE-LINED SLIPPER", "SPEED UP"];
+		//playerInfo.status.speed ++;
+		itemInfo = ["THREE-LINED SLIPPER", "NOTHING UP"];
 		break;
 	case 13:
 		playerInfo.status.range += 4;

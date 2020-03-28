@@ -19,7 +19,7 @@ public class Room {
 	
 	private int[][] monsters; // {monsterCode, x, y}
 	
-	private int[][] items; // {itemCode, gridX, gridY}
+	private int[][] items; // {gridX, gridY, itemCode}
 	
 	private Chest chest;
 	
