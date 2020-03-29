@@ -27,7 +27,7 @@ public class StageService {
 		
 		switch(name) {
 		case "gamjeon":
-			status = new Status(4, 4, 0, 1, 5, 20, 300);
+			status = new Status(6, 6, 0, 1, 5, 20, 300);
 			playerInfo = new PlayerInfo(0, 1, 0, 1, 0, status);
 			break;
 		default:

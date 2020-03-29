@@ -71,7 +71,8 @@
 		var attackDirection = 1;
 		
 		var controlFlag = true;
-		var attackFlag = true;	
+		var attackFlag = true;
+		var gameOverFlag = false;
 		
 		document.addEventListener("keydown", keyDown, false);
 		document.addEventListener("keyup", keyUp, false);
@@ -82,6 +83,11 @@
 		
 		function keyDown(e) {
 			var key = e.keyCode;
+			
+			if(gameOverFlag) {
+				restart();
+				return;
+			}
 			
 			// ESC
 			
@@ -204,8 +210,7 @@
 						this.invincibleFlag = true;
 						
 						if(this.status.life <= 0) {
-							console.log("Gamjeon died");
-							clearInterval(drawInterval);
+							gameOver();
 						} else {
 							setTimeout(function() {
 								playerInfo.invincibleFlag = false;
@@ -367,19 +372,19 @@
 					},
 					isValid: function() {
 						if(monsterDamagedCheck(this.x, this.y, 20, playerInfo.status.damage)) {
-							console.log("attack removed by monster");
+							//console.log("attack removed by monster");
 							return false;
 						} if(!obstacleAttackCheck(this.dir, this.x, this.y, 20)) {
-							console.log("attack removed by obstacle");
+							//console.log("attack removed by obstacle");
 							return false;
 						} else if(this.x + 10 < wall[2] || this.x + 10 > cw - wall[3]) {
-							console.log("attack removed by wall left or wall right");
+							//console.log("attack removed by wall left or wall right");
 							return false;
 						} else if(this.y + 10 < wall[0] || this.y + 10 > ch - wall[1]) {
-							console.log("attack removed by wall top or wall bottom");
+							//console.log("attack removed by wall top or wall bottom");
 							return false;
 						} else if(this.rangeCount == playerInfo.status.range) {
-							console.log("attack removed because of range limit");
+							//console.log("attack removed because of range limit");
 							return false;
 						} else {
 							return true;
@@ -672,9 +677,10 @@
 				}
 			}
 			monsterDamagedCheck(bombInfo.x, bombInfo.y, 160, 10);
+			playerCollisionCheck(bombInfo.x, bombInfo.y, 160, 160, 2);
 		}
 		
-		function playerCollisionCheck(objX, objY, objWidth, objHeight, dmg) { // monster, boss and their attack
+		function playerCollisionCheck(objX, objY, objWidth, objHeight, dmg) { // monster, boss and their attack, bomb
 			var vx = (playerInfo.hitBox.x + playerInfo.hitBox.width/2) - (objX + objWidth/2);
 			var vy = (playerInfo.hitBox.y + playerInfo.hitBox.height/2) - (objY + objHeight/2);
 			var boundX = (playerInfo.hitBox.width + objWidth)/2;
@@ -699,7 +705,7 @@
 				
 				if(Math.abs(vx) < boundX && Math.abs(vy) < boundY && monster[i].status.life > 0) {
 					monster[i].damaged(dmg);
-					console.log("monster damaged");
+					//console.log("monster damaged");
 					return true;
 				}
 			}
@@ -712,7 +718,7 @@
 				
 				if(Math.abs(vx) < boundX && Math.abs(vy) < boundY) {
 					bossInfo.damaged(dmg);
-					console.log("boss damaged");
+					//console.log("boss damaged");
 					return true;
 				}
 			}
@@ -1043,6 +1049,10 @@
 						ctx.drawImage(bossInfo.img, bossInfo.attack[i].cropX, bossInfo.attack[i].cropY, bossInfo.attack[i].size, bossInfo.attack[i].size, bossInfo.attack[i].x, bossInfo.attack[i].y, bossInfo.attack[i].size, bossInfo.attack[i].size);
 						playerCollisionCheck(bossInfo.attack[i].x, bossInfo.attack[i].y, bossInfo.attack[i].size, bossInfo.attack[i].size, bossInfo.status.damage);
 					}
+					ctx.fillStyle = "#000000";
+					ctx.fillRect(140, 10, 260, 20);
+					ctx.fillStyle = "#FF0000";
+					ctx.fillRect(145, 15, bossInfo.status.life * 10, 10);
 				}
 			}
 		}
@@ -1174,6 +1184,20 @@
 			ctx.fillText((325-playerInfo.status.delay)/25+"/7", 240, 150);
 			ctx.fillText(playerInfo.status.damage+"/7", 320, 150);
 			ctx.fillText(playerInfo.status.range/4-4+"/7", 410, 150);
+		}
+		
+		function gameOver() {
+			clearInterval(drawInterval);
+			gameOverFlag = true;
+			controlFlag = false;
+			pausedImg.src = "img/bg/gameover.png";
+			pausedImg.onload = function() {
+				ctx.drawImage(pausedImg, 70, 35);
+			}
+		}
+		
+		function restart() {
+			location.href="/";
 		}
 		/*]]>*/
 	</script>
