@@ -187,23 +187,23 @@ function subwayAgent() {
 				
 				if(pmy + 60 < this.y && pmx + 30 > this.x - 75 && pmx + 30 < this.x + 75 + this.hitBox.width) {
 					for(var i = 0; i < 3; i++) {
-						mx.push(-2 + i * 2);
+						mx.push(-4 + i * 4);
 						my.push(-6);
 					}
 				} else if(pmy > this.y + this.hitBox.height && pmx + 30 > this.x - 75 && pmx + 30 < this.x + 75 + this.hitBox.width) {
 					for(var i = 0; i < 3; i++) {
-						mx.push(-2 + i * 2);
+						mx.push(-4 + i * 4);
 						my.push(6);
 					}
 				} else if(pmx + 30 < this.x + this.hitBox.height/2) {
 					for(var i = 0; i < 3; i++) {
 						mx.push(-6);
-						my.push(-2 + i * 2);
+						my.push(-4 + i * 4);
 					}
 				} else {
 					for(var i = 0; i < 3; i++) {
 						mx.push(6);
-						my.push(-2 + i * 2);
+						my.push(-4 + i * 4);
 					}
 				}
 				

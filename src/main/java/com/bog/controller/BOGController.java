@@ -25,14 +25,6 @@ public class BOGController {
 		return "title";
 	}
 	
-	@GetMapping(value="/test")
-	public String test(Model model) {
-		int[] pos = {210, 160};
-		model.addAttribute("pos", pos);
-		
-		return "canvas";
-	}
-	
 	@PostMapping(value="/game")
 	public String stage(Model model, String posted) {
 		int[] pos = {210, 160};

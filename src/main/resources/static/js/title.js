@@ -94,10 +94,10 @@ function drawTunnelLight() {
 	lightX -= 10;
 
 	if (lightX < -75) {
-		lightX = 500;
+		lightX = 540;
 		zzzChk++;
 	}
-	if (zzzChk > 7) {
+	if (zzzChk > 3) {
 		zzzFlag = true;
 	}
 
@@ -119,22 +119,24 @@ function doorMove() {
 }
 
 function blackout() {
-	if (zzzChk > 10 && zzzChk < 15) {
+	if (zzzChk > 5 && zzzChk < 7) {
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
-	} else if (zzzChk == 15) {
+	} else if (zzzChk == 7) {
 		zzzChk++;
 		tunnelLightFlag = false;
 		doorLeft.src = "img/sprite/subway_door_left_dark.png";
 		doorRight.src = "img/sprite/subway_door_right_dark.png";
 		bg.src = "img/bg/subway_dark.png";
 		setTimeout(function() {
-			zzzFlag = false;
-			confusedFlag = true;
 			doorMoveFlag = true;
+			setTimeout(function() {
+				zzzFlag = false;
+				confusedFlag = true;
+			}, 500);
 			setTimeout(function() {
 				confusedFlag = false;
 				playerMoveFlag = true;
-			}, 1000);
+			}, 1500);
 		}, 3000);
 	}
 }
@@ -154,7 +156,7 @@ function playerMove() {
 		setTimeout(function() {
 			surprisedFlag = false;
 			playerY = 500;
-			setTimeout(prologueEnd, 2000);
+			setTimeout(prologueEnd, 1000);
 		}, 1000);
 	}
 }

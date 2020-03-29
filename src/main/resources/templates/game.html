@@ -18,7 +18,7 @@
 	<img id="player" width="400" height="160" src="img/character/gamjeon.png">
 	<img id="emotion" width="200" height="50" src="img/character/emotion/emotion.png">
 	<img id="attack" width="20" height="20" src="img/character/weapon/default.png">
-	<img id="bomb" width="160" height="360" src="img/sprite/bomb.png">
+	<img id="bomb" width="80" height="200" src="img/sprite/bomb.png">
 	<img id="paused" width="400" height="350" src="img/bg/paused.png">
 	<img id="spotlight" width="200" height="300" src="img/sprite/spotlight.png">
 	
@@ -60,7 +60,6 @@
 		var bossInfo = null;
 		
 		var drawInterval;
-		var pauseInterval;
 		
 		var wall = [60, 60, 60, 60]; // top, bottom, left, right
 		var attacks = [];
@@ -94,9 +93,8 @@
 			if(key==27) {
 				if(controlFlag) {
 					clearInterval(drawInterval);
-					pauseInterval = setInterval(pause, 20);
+					pause();
 				} else {
-					clearInterval(pauseInterval);
 					drawInterval = setInterval(draw, 20);
 					controlFlag = true;
 				}
@@ -371,7 +369,7 @@
 						this.rangeCount++;
 					},
 					isValid: function() {
-						if(monsterDamagedCheck(this.x, this.y, 20, playerInfo.status.damage)) {
+						if(monsterDamagedCheck(this.x, this.y, 20, playerInfo.status.damage, false)) {
 							//console.log("attack removed by monster");
 							return false;
 						} if(!obstacleAttackCheck(this.dir, this.x, this.y, 20)) {
@@ -676,8 +674,8 @@
 					obstacleImg[i].src = "img/sprite/stone_was_here.png";
 				}
 			}
-			monsterDamagedCheck(bombInfo.x, bombInfo.y, 160, 10);
-			playerCollisionCheck(bombInfo.x, bombInfo.y, 160, 160, 2);
+			monsterDamagedCheck(bombInfo.x, bombInfo.y, 80, 10, true);
+			playerCollisionCheck(bombInfo.x, bombInfo.y, 80, 80, 2);
 		}
 		
 		function playerCollisionCheck(objX, objY, objWidth, objHeight, dmg) { // monster, boss and their attack, bomb
@@ -691,11 +689,12 @@
 			}
 		}
 		
-		function monsterDamagedCheck(bx, by, size, dmg) {
+		function monsterDamagedCheck(bx, by, size, dmg, splash) {
 			var vx;
 			var vy;
 			var boundX;
 			var boundY;
+			var splashDamage = false;
 			
 			for(var i = 0; i < monster.length; i++) {
 				vx = (monster[i].hitBox.x + monster[i].hitBox.width/2) - (bx + size/2);
@@ -706,7 +705,11 @@
 				if(Math.abs(vx) < boundX && Math.abs(vy) < boundY && monster[i].status.life > 0) {
 					monster[i].damaged(dmg);
 					//console.log("monster damaged");
-					return true;
+					if(!splash) {
+						return true;
+					} else {
+						splashDamage = true;
+					}
 				}
 			}
 			
@@ -723,7 +726,7 @@
 				}
 			}
 			
-			return false;
+			return splashDamage;
 		}
 		
 		function monsterExtinctCheck() {
@@ -882,14 +885,14 @@
 			} else if(bombInfo.count == 50) {
 				bombInfo.cropX = 0;
 				bombInfo.cropY = 40;
-				bombInfo.width = 160;
-				bombInfo.height = 160;
-				bombInfo.x -= 60;
-				bombInfo.y -= 60;
+				bombInfo.width = 80;
+				bombInfo.height = 80;
+				bombInfo.x -= 20;
+				bombInfo.y -= 20;
 				explosionCheck();
 			} else if(bombInfo.count == 55) {
 				bombInfo.cropX = 0;
-				bombInfo.cropY = 200;
+				bombInfo.cropY = 120;
 			} else if(bombInfo.count == 60) {
 				bombInfo = null;
 				return;
@@ -1176,14 +1179,29 @@
 			pressed[2] = false;
 			pressed[3] = false;
 			
-			ctx.clearRect(0, 0, cw, ch);
-			ctx.drawImage(pausedImg, 70, 35);
-			ctx.font = '20px Arial';
-			ctx.fillStyle = "#585858";
-			ctx.fillText(playerInfo.status.speed-4+"/7", 145, 150);
-			ctx.fillText((325-playerInfo.status.delay)/25+"/7", 240, 150);
-			ctx.fillText(playerInfo.status.damage+"/7", 320, 150);
-			ctx.fillText(playerInfo.status.range/4-4+"/7", 410, 150);
+			var speed = playerInfo.status.speed-4;
+			var delay = (325-playerInfo.status.delay)/25;
+			var damage = playerInfo.status.damage;
+			var range = playerInfo.status.range/4-4;
+			var stat = [speed, delay, damage, range];
+			
+			pausedImg.src = "img/bg/paused.png";
+			pausedImg.onload = function() {
+				ctx.clearRect(0, 0, cw, ch);
+				ctx.drawImage(pausedImg, 70, 35);
+				
+				for(var i = 0; i < stat.length; i++) {
+					for(var j = 0; j < 5; j++) {
+						if(stat[i]==0) {
+							ctx.fillStyle = "#C3C3C3";
+						} else {
+							ctx.fillStyle = "#585858";
+							stat[i]--;
+						}
+						ctx.fillRect((140 + i * 80) + j * 6, 130, 3, 10);
+					}
+				}
+			}
 		}
 		
 		function gameOver() {
