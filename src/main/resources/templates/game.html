@@ -192,7 +192,7 @@
 					this.moveBox.x = this.x + 20;
 					this.moveBox.y = this.y + 40;
 					this.hitBox.x = this.x + 20;
-					this.hitBox.y = this.y + 30;
+					this.hitBox.y = this.y + 15;
 				},
 				damaged: function(dmg) {
 					if(!this.invincibleFlag) {
@@ -367,19 +367,19 @@
 					},
 					isValid: function() {
 						if(monsterDamagedCheck(this.x, this.y, 20, playerInfo.status.damage)) {
-							//console.log("attack removed by monster");
+							console.log("attack removed by monster");
 							return false;
 						} if(!obstacleAttackCheck(this.dir, this.x, this.y, 20)) {
-							//console.log("attack removed by obstacle");
+							console.log("attack removed by obstacle");
 							return false;
-						} else if(this.x < wall[2] || this.x > cw - wall[3]) {
-							//console.log("attack removed by wall left or wall right");
+						} else if(this.x + 10 < wall[2] || this.x + 10 > cw - wall[3]) {
+							console.log("attack removed by wall left or wall right");
 							return false;
-						} else if(this.y < wall[0] || this.y > ch - wall[1]) {
-							//console.log("attack removed by wall top or wall bottom");
+						} else if(this.y + 10 < wall[0] || this.y + 10 > ch - wall[1]) {
+							console.log("attack removed by wall top or wall bottom");
 							return false;
 						} else if(this.rangeCount == playerInfo.status.range) {
-							//console.log("attack removed because of range limit");
+							console.log("attack removed because of range limit");
 							return false;
 						} else {
 							return true;
@@ -632,8 +632,8 @@
 		function obstacleAttackCheck(dir, x, y, size) {
 			var mx = x + size/2;
 			var my = y + size/2;
-			var boundX = 30 + size/2;
-			var boundY = 30 + size/2;
+			var boundX = 20 + size/2;
+			var boundY = 20 + size/2;
 			var ox;
 			var oy;
 			var vx;
@@ -697,7 +697,7 @@
 				boundX = monster[i].hitBox.width/2 + size/2;
 				boundY = monster[i].hitBox.height/2 + size/2;
 				
-				if(Math.abs(vx) < boundX && Math.abs(vy) < boundY) {
+				if(Math.abs(vx) < boundX && Math.abs(vy) < boundY && monster[i].status.life > 0) {
 					monster[i].damaged(dmg);
 					console.log("monster damaged");
 					return true;

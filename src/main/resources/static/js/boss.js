@@ -15,8 +15,6 @@ function bossInit() {
 		boss.img = bossImgInit("agent.png", "960", "220");
 	}
 	
-	console.log("rand: " + rand);
-	
 	return boss;
 }
 
@@ -51,7 +49,7 @@ function subwayAgent() {
 		counter : 0,
 		pattern : 0,
 		status : {
-			life : 20,
+			life : 25,
 			damage : 1,
 			speed : 5,
 			range : 0

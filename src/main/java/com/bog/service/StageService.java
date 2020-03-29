@@ -27,8 +27,8 @@ public class StageService {
 		
 		switch(name) {
 		case "gamjeon":
-			status = new Status(4, 6, 1, 1, 5, 20, 300);
-			playerInfo = new PlayerInfo(99, 99, 99, 1, 0, status);
+			status = new Status(4, 4, 0, 1, 5, 20, 300);
+			playerInfo = new PlayerInfo(0, 1, 0, 1, 0, status);
 			break;
 		default:
 			playerInfo = playerInfoInit("gamjeon");
@@ -54,9 +54,7 @@ public class StageService {
 		}
 		
 		roomInfo = setSpecialRoom(stage, roomInfo);
-		
-		int[][] monster1 = {{1, 180, 180}};
-		roomInfo[1].setMonsters(monster1);
+		roomInfo = setMonsters(stage, roomInfo);
 		
 		return roomInfo;
 	}
@@ -67,13 +65,51 @@ public class StageService {
 			case 1:
 				int[][] obstacles101 = {{1, 1, 1}, {5, 1, 1}, {1, 3, 1}, {5, 3, 1}};
 				return obstacles101;
+			case 2:
+				int[][] obstacles102 = new int[10][3];
+				for(int i = 0; i < obstacles102.length; i++) {
+					obstacles102[i][0] = i%5+1;
+					obstacles102[i][1] = (i/5==0) ? 1 : 3;
+					obstacles102[i][2] = 1;
+				}
+				return obstacles102;
+			case 3:
+				int[][] obstacles103 = {{5, 1, 2}, {1, 1, 1}, {2, 1, 1}, {1, 2, 1}, {5, 2, 1}, {4, 3, 1}, {5, 3, 1}, {1, 4, 2}};
+				return obstacles103;
 			case 5:
-				int[][] obstacles105 = {{1, 1, 2}, {5, 1, 2}, {2, 2, 2}, {4, 2, 2}, {1, 3, 2}, {5, 3, 2}};
+				int[][] obstacles105 = {{1, 1, 2}, {2, 1, 1}, {4, 1, 1}, {5, 1, 2}, {2, 2, 2}, {4, 2, 2}, {1, 3, 2}, {2, 3, 1}, {4, 3, 1}, {5, 3, 2}};
 				return obstacles105;
+			case 8:
+				int[][] obstacles108 = {{5, 0, 1}, {0, 1, 1}, {1, 1, 1}, {2, 1, 1}, {5, 1, 1}, {1, 3, 1}, {4, 3, 1}, {5, 3, 1}, {6, 3, 1}, {1, 4, 1}};
+				return obstacles108;
 			}
 		}
 		int[][] obstacles_d = {};
 		return obstacles_d;
+	}
+	
+	private Room[] setMonsters(int stage, Room[] room) { // code, x, y
+		if(stage == 1) {
+			int[][] monster1 = {{1, 180, 180}, {1, 180, 240}};
+			room[1].setMonsters(monster1);
+			
+			int[][] monster2 = {{2, 180, 60}, {2, 240, 180}, {2, 300, 300}};
+			room[2].setMonsters(monster2);
+			
+			int[][] monster3 = {{4, 180, 180}, {4, 300, 180}, {3, 360, 60}, {3, 120, 240}};
+			room[3].setMonsters(monster3);
+			
+			int[][] monster5 = {{3, 200, 200}, {3, 300, 300}};
+			room[5].setMonsters(monster5);
+			
+			int[][] monster6 = {{1, 240, 180}, {2, 120, 120}, {2, 360, 240}};
+			room[6].setMonsters(monster6);
+			
+			int[][] monster8 = {{4, 120, 180}, {4, 240, 180}, {4, 320, 180}};
+			room[8].setMonsters(monster8);
+		}
+
+		return room;
 	}
 	
 	private Room[] setSpecialRoom(int stage, Room[] room) {
