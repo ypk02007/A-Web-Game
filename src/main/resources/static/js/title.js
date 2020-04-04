@@ -23,7 +23,7 @@ var playerX = 246;
 var playerY = 155;
 var leftX = 77;
 var rightX = 126;
-var lightX = 500;
+var lightX = 540;
 
 var zzzChk = 0;
 var doorChk = 0;

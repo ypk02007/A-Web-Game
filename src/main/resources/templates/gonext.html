@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>The Binding of GAMJEON</title>
+
+<link rel="stylesheet" type="text/css" href="css/common.css">
+
+</head>
+<body>
+
+	<canvas id="canvas" width="540" height="420"></canvas>
+	
+	<script type="text/javascript" src="js/gonext.js"></script>
+	<script th:inline="javascript">
+	/*<![CDATA[*/
+		window.onload = function() {
+			var stage = [[${stage}]];
+			init(stage);
+		}
+	/*]]>*/
+	</script>
+
+</body>
+</html>
