@@ -6,6 +6,10 @@
 				return;
 			}
 			
+			if(goNextStageFlag) {
+				return;
+			}
+			
 			// ESC
 			
 			if(key==27) {
@@ -117,8 +121,7 @@
 		}
 		
 		function doorLockSetting() {
-			if(monsterExtinctCheck()) { // all monsters in the room are dead or
-										// no monster room
+			if(monsterExtinctCheck()) { // all monsters in the room are dead or no monster room
 				var doors = roomInfo[roomNo].doors;
 				for(var i = 0; i < doors.length; i++) {
 					if(doors[i]==3 || doors[i]==7) {
@@ -341,9 +344,7 @@
 			}
 			
 			for(var i = 0; i < doorImgInfo.length; i++) { // unlock the door
-				if(playerInfo.key < 1 || !monsterExtinctCheck()) { // no key or
-																	// monsters
-																	// exist
+				if(playerInfo.key < 1 || !monsterExtinctCheck()) { // no key or monsters exist
 					break;
 				}
 				if(doorImgInfo[i] == null) {
@@ -540,12 +541,7 @@
 			playerCollisionCheck(bombInfo.x, bombInfo.y, 80, 80, 2);
 		}
 		
-		function playerCollisionCheck(objX, objY, objWidth, objHeight, dmg) { // monster,
-																				// boss
-																				// and
-																				// their
-																				// attack,
-																				// bomb
+		function playerCollisionCheck(objX, objY, objWidth, objHeight, dmg) { // monster, boss and their attack, bomb
 			var vx = (playerInfo.hitBox.x + playerInfo.hitBox.width/2) - (objX + objWidth/2);
 			var vy = (playerInfo.hitBox.y + playerInfo.hitBox.height/2) - (objY + objHeight/2);
 			var boundX = (playerInfo.hitBox.width + objWidth)/2;
@@ -633,6 +629,11 @@
 				drawBomb();
 			}
 			
+			if(goNextStageDoor != null && goNextStageDoor.roomNo == roomNo) {
+				ctx.fillStyle = '#000000';
+				ctx.fillRect(goNextStageDoor.x, goNextStageDoor.y, 60, 60);
+			}
+			
 			var bodyCrop = Math.floor(directionCode/2);
 			if(playerInfo.invincibleFlag) {
 				ctx.globalAlpha = 0.5;
@@ -696,8 +697,7 @@
 					var ix = item[i][0] * 60 + 60;
 					var iy = item[i][1] * 60 + 60;
 					ctx.drawImage(itemImg, 170, 0, 30, 20, ix + 15, iy + 25, 30, 20); // prop
-					ctx.drawImage(itemImg, item[i][2]%10*20, Math.floor(item[i][2]/10)*20, 20, 20, ix + 20, iy + 15, 20, 20); // item
-																																// icon
+					ctx.drawImage(itemImg, item[i][2]%10*20, Math.floor(item[i][2]/10)*20, 20, 20, ix + 20, iy + 15, 20, 20); // item icon
 				}
 			}
 		}
@@ -908,9 +908,14 @@
 				playerCollisionCheck(monster[i].hitBox.x, monster[i].hitBox.y, monster[i].hitBox.width, monster[i].hitBox.height, monster[i].status.damage);
 			}
 			if(bossInfo != null) { // boss exists
-				if(bossInfo.status.life <= 0) { // the boss died
+				if(bossInfo.status.end > 30) { // the boss died
 					bossInfo = null;
 					roomInfo[roomNo].bossRoom = false;
+					goNextStageDoor = {
+						x: 240,
+						y: 120,
+						roomNo: roomNo
+					};
 					doorLockSetting();
 				} else {
 					bossInfo.act();
@@ -920,7 +925,7 @@
 						ctx.drawImage(bossInfo.img, bossInfo.attack[i].cropX, bossInfo.attack[i].cropY, bossInfo.attack[i].size, bossInfo.attack[i].size, bossInfo.attack[i].x, bossInfo.attack[i].y, bossInfo.attack[i].size, bossInfo.attack[i].size);
 						playerCollisionCheck(bossInfo.attack[i].x, bossInfo.attack[i].y, bossInfo.attack[i].size, bossInfo.attack[i].size, bossInfo.status.damage);
 					}
-					ctx.fillStyle = "#000000";
+					ctx.fillStyle = "#000000"; // hp bar
 					ctx.fillRect(140, 10, 260, 20);
 					ctx.fillStyle = "#FF0000";
 					ctx.fillRect(145, 15, bossInfo.status.life * 10, 10);
@@ -950,6 +955,8 @@
 			chestCheck();
 			
 			itemGetCheck();
+			
+			goNextStageCheck()
 		}
 		
 		function drawInfo() {
@@ -1084,4 +1091,52 @@
 		
 		function restart() {
 			location.href="/";
+		}
+		
+		function goNextStageCheck() {
+			if(goNextStageDoor == null || goNextStageDoor.roomNo != roomNo) {
+				return;
+			}
+			var pmx = playerInfo.moveBox.x + playerInfo.moveBox.width/2;
+			var pmy = playerInfo.moveBox.y + playerInfo.moveBox.height/2;
+			var dx = goNextStageDoor.x + 30;
+			var dy = goNextStageDoor.y + 30;
+			
+			if(Math.abs(pmx-dx) < 20 && Math.abs(pmy-dy) < 20) {
+				controlFlag = false;
+				goNextStageFlag = true;
+				clearInterval(drawInterval);
+				
+				directionCode = 2;
+				attackDirection = 1;
+				var bodyCrop = Math.floor(directionCode/2);
+				var gx = goNextStageDoor.x - 10;
+				var gy = goNextStageDoor.y - 20;
+				var my = -5;
+				var count = 0;
+				var goNextInterval = setInterval(function() {
+					ctx.clearRect(0, 0, cw, ch)
+					
+					ctx.drawImage(roomImg, 0, 0);
+			
+					drawDoor();
+			
+					ctx.fillStyle = '#C3C3C3';
+					ctx.fillRect(60, 60, floor.width, floor.height);
+					
+					ctx.fillStyle = '#000000';
+					ctx.fillRect(goNextStageDoor.x, goNextStageDoor.y, 60, 60);
+					
+					ctx.drawImage(playerImg, bodyCrop * 80, 80, 80, 80, gx, gy, 80, 80);
+					ctx.drawImage(playerImg, attackDirection * 80, 0, 80, 80, gx, gy, 80, 80);
+					
+					my = (count < 10) ? -5 : 5;
+					gy += my;
+					count++;
+					if(count >= 20) {
+						clearInterval(goNextInterval);
+						location.href="/gonext";
+					}
+				}, 20);
+			}
 		}

@@ -52,58 +52,23 @@ function subwayAgent() {
 			life : 25,
 			damage : 1,
 			speed : 5,
-			range : 0
+			range : 0,
+			end: 0
 		},
 		attack : [],
 		act : function() {
-			if(this.counter <= 40 && this.counter%2 == 0) {
-				this.move();
-			}
-			
-			switch(this.counter) {
-			case 50:
-				this.pattern = Math.floor(Math.random() * 2);
+			if(this.status.life > 0) {
+				if(this.counter <= 40 && this.counter%2 == 0) {
+					this.move();
+				}
 				
-				var dir = (playerInfo.moveBox.x < this.moveBox.x) ? 0 : 1;
-				this.cropX = (this.pattern == 0) ? 320 : 640;
-				this.cropX += dir * 160;
-				break;
-			case 60:
-				if(this.pattern == 0) {
-					var dir = (playerInfo.moveBox.x < this.moveBox.x) ? 0 : 1;
-					this.cropX = 400 + dir * 160;
-				}
-				break;
-			case 110:
-				var dir = (playerInfo.moveBox.x < this.moveBox.x) ? 0 : 1;
-				this.cropX = (this.pattern == 0) ? 0 : 720;
-				this.cropX += dir * 160;
-				this.attackPattern();
-				break;
+				this.attackReady();
+				this.attackCheck();
+			} else {
+				this.lifeZero();
 			}
-
-			this.counter++;
 			
-			var remove = [];
-			for(var i = 0; i < this.attack.length; i++) {
-				this.attack[i].x += this.attack[i].mx;
-				this.attack[i].y += this.attack[i].my;
-				if(this.pattern == 0) {
-					this.attack[i].cropX += 60;
-					if(this.attack[i].cropX >= 240) {
-						this.attack[i].cropX = 0;
-					}
-				}
-				if(this.attack[i].x < -this.attack[i].size || this.attack[i].x > 540 || this.attack[i].y < -this.attack[i].size || this.attack[i].y > 420) {
-					remove.push(i);
-				}
-			}
-			remove = remove.sort(function(a, b) {
-				return b-a;
-			});
-			for(var i = 0; i < remove.length; i++) {
-				this.attack.splice(remove[i], 1);
-			}
+			this.counter++;
 			
 			if(this.counter > 210) {
 				this.counter = 0;
@@ -147,6 +112,57 @@ function subwayAgent() {
 					this.setBoxes();
 				}
 			}
+		},
+		attackReady : function() {
+			switch(this.counter) {
+			case 50:
+				this.pattern = Math.floor(Math.random() * 2);
+				
+				var dir = (playerInfo.moveBox.x < this.moveBox.x) ? 0 : 1;
+				this.cropX = (this.pattern == 0) ? 320 : 640;
+				this.cropX += dir * 160;
+				break;
+			case 60:
+				if(this.pattern == 0) {
+					var dir = (playerInfo.moveBox.x < this.moveBox.x) ? 0 : 1;
+					this.cropX = 400 + dir * 160;
+				}
+				break;
+			case 110:
+				var dir = (playerInfo.moveBox.x < this.moveBox.x) ? 0 : 1;
+				this.cropX = (this.pattern == 0) ? 0 : 720;
+				this.cropX += dir * 160;
+				this.attackPattern();
+				break;
+			}
+		},
+		attackCheck : function() {
+			var remove = [];
+			for(var i = 0; i < this.attack.length; i++) {
+				this.attack[i].x += this.attack[i].mx;
+				this.attack[i].y += this.attack[i].my;
+				if(this.pattern == 0) {
+					this.attack[i].cropX += 60;
+					if(this.attack[i].cropX >= 240) {
+						this.attack[i].cropX = 0;
+					}
+				}
+				if(this.attack[i].x < -this.attack[i].size || this.attack[i].x > 540 || this.attack[i].y < -this.attack[i].size || this.attack[i].y > 420) {
+					remove.push(i);
+				}
+			}
+			remove = remove.sort(function(a, b) {
+				return b-a;
+			});
+			for(var i = 0; i < remove.length; i++) {
+				this.attack.splice(remove[i], 1);
+			}
+		},
+		lifeZero : function() {
+			this.cropX = 960;
+			var vibrate = (this.counter%4<2) ? -20 : 20;
+			this.x += vibrate;
+			this.status.end++;
 		},
 		setBoxes : function() {
 			this.moveBox.x = this.x;
@@ -223,6 +239,9 @@ function subwayAgent() {
 		},
 		damaged : function(dmg) {
 			this.status.life -= dmg;
+			if(this.status.life < 0) {
+				this.status.life = 0;
+			}
 		}
 	}
 	

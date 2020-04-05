@@ -59,6 +59,7 @@
 		var itemGetObj = null;
 		var monster = [];
 		var bossInfo = null;
+		var goNextStageDoor = null;
 		
 		var drawInterval;
 		
@@ -73,6 +74,7 @@
 		var controlFlag = true;
 		var attackFlag = true;
 		var gameOverFlag = false;
+		var goNextStageFlag = false;
 		
 		document.addEventListener("keydown", keyDown, false);
 		document.addEventListener("keyup", keyUp, false);
@@ -118,7 +120,7 @@
 					this.hitBox.y = this.y + 15;
 				},
 				damaged: function(dmg) {
-					if(!this.invincibleFlag) {
+					if(!this.invincibleFlag && dmg > 0) {
 						if(this.status.elecLife > 0) {
 							this.status.elecLife -= dmg;
 						} else {
