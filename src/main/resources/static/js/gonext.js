@@ -79,7 +79,7 @@ function draw() {
 	counter++;
 	if(counter >= 140) {
 		clearInterval(drawInterval);
-		console.log("interval ended");
+		goToGame();
 	}
 }
 
@@ -127,4 +127,21 @@ function drawInfo() {
 	} else {
 		ctx2.drawImage(imgs[4].img, 80, 0, 80, 80, 30 + (stageInfo-1) * 100, 0, 80, 80);
 	}
+}
+
+function goToGame() {
+	var form = document.createElement("form");
+	form.setAttribute("charset", "UTF-8");
+	form.setAttribute("method", "Post");
+	form.setAttribute("action", "/game");
+
+	var hiddenField = document.createElement("input");
+	hiddenField.setAttribute("type", "hidden");
+	hiddenField.setAttribute("name", "posted");
+	hiddenField.setAttribute("value", "gamjeon");
+	form.appendChild(hiddenField);
+
+	document.body.appendChild(form);
+
+	form.submit();
 }

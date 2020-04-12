@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.bog.component.ShutdownManager;
 import com.bog.model.PlayerInfo;
@@ -25,26 +26,37 @@ public class BOGController {
 		return "title";
 	}
 	
-	@GetMapping(value="/gonext")
-	public String goNext(Model model) {
-		model.addAttribute("stage", 1);
-		return "gonext";
-	}
-	
 	@PostMapping(value="/game")
 	public String stage(Model model, String posted) {
 		int[] pos = {210, 160};
 		model.addAttribute("pos", pos);
 		
-		PlayerInfo playerInfo = stageService.playerInfoInit("gamjeon");
+		if(stageService.getPlayerInfo() == null) { // first stage
+			stageService.playerInfoInit(posted);
+		} else {
+			stageService.goNextStage();
+		}
+		
+		PlayerInfo playerInfo = stageService.getPlayerInfo();
 		model.addAttribute("playerInfo", playerInfo);
 		
-		Room[] roomInfo = stageService.roomInfoInit(1);
+		Room[] roomInfo = stageService.roomInfoInit();
 		model.addAttribute("roomInfo", roomInfo);
 		
-		String stage = stageService.goToStage(posted);
+		String stage = (playerInfo == null || roomInfo == null) ? "error" : "game";
 		
 		return stage;
+	}
+	
+	@GetMapping(value="/gonext")
+	public String goNext(Model model) {
+		model.addAttribute("stage", stageService.getCurrentStage());
+		return "gonext";
+	}
+	
+	@PostMapping(value="/gonext")
+	public void goNext(@RequestBody PlayerInfo playerInfo) {
+		stageService.setPlayerInfo(playerInfo);
 	}
 	
 	@PostMapping(value="/shutdown")

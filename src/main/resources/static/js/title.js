@@ -165,12 +165,12 @@ function prologueEnd() {
 	var form = document.createElement("form");
 	form.setAttribute("charset", "UTF-8");
 	form.setAttribute("method", "Post");
-	form.setAttribute("action", "http://localhost:8888/game");
+	form.setAttribute("action", "/game");
 
 	var hiddenField = document.createElement("input");
 	hiddenField.setAttribute("type", "hidden");
 	hiddenField.setAttribute("name", "posted");
-	hiddenField.setAttribute("value", "GAMJEON");
+	hiddenField.setAttribute("value", "gamjeon");
 	form.appendChild(hiddenField);
 
 	document.body.appendChild(form);

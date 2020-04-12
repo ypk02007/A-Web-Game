@@ -9,54 +9,66 @@ import com.bog.model.PlayerInfo;
 import com.bog.model.Room;
 import com.bog.model.Status;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Service
 public class StageService {
-
-	public String goToStage(String str) {
-		switch(str) {
-		case "GAMJEON":
-			return "game";
-		default:
-			return "title";	
-		}
+	
+	@Getter
+	private int currentStage = 1;
+	
+	@Getter
+	@Setter
+	private PlayerInfo playerInfo = null;
+	
+	public void goNextStage() {
+		currentStage++;
 	}
 	
-	public PlayerInfo playerInfoInit(String name) {
-		PlayerInfo playerInfo;
+	public void playerInfoInit(String name) {
 		Status status;
 		
 		switch(name) {
 		case "gamjeon":
 			status = new Status(6, 6, 0, 1, 5, 20, 300);
-			playerInfo = new PlayerInfo(0, 1, 0, 1, 0, status);
+			playerInfo = new PlayerInfo(10, 5, 5, 1, 0, status);
 			break;
-		default:
-			playerInfo = playerInfoInit("gamjeon");
 		}
-		
-		return playerInfo;
 	}
 	
-	public Room[] roomInfoInit(int stage) {
-		Room[] roomInfo = new Room[11];
-		int[][] map = {{1, 2}, {1, 1}, {0, 1}, {2, 1}, {2, 0}, {1, 3}, {0, 3}, {0, 4}, {2, 3}, {2, 4}, {0, 0}};
-		int[][] door = {{0, 0, 2, 2}, {1, 1, 0, 2}, {0, 1, 1, 0}, {1, 0, 1, 0}, {0, 0, 0, 1}, {1, 1, 2, 0}, {0, 1, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 1}, {0, 0, 1, 0}, {0, 0, 0, 1}};
-		int[][] link = {{0, 0, 1, 5}, {2, 3, 0, 0}, {0, 1, 10, 0}, {1, 0, 4, 0}, {0, 0, 0, 3}, {6, 8, 0, 0}, {0, 5, 0, 7}, {0, 0, 6, 0}, {5, 0, 0, 9}, {0, 0, 8, 0}, {0, 0, 0, 2}};
-		
-		for(int i = 0; i < roomInfo.length; i++) {
-			int visited = 0;
-			if(i == 1 || i == 5) {
-				visited = 1;
-			} else if(i == 0) {
-				visited = 2;
+	public Room[] roomInfoInit() {
+		if(currentStage == 1) {
+			Room[] roomInfo = new Room[11];
+			int[][] map = {{1, 2}, {1, 1}, {0, 1}, {2, 1}, {2, 0}, {1, 3}, {0, 3}, {0, 4}, {2, 3}, {2, 4}, {0, 0}};
+			int[][] door = {{0, 0, 2, 2}, {1, 1, 0, 2}, {0, 1, 1, 0}, {1, 0, 1, 0}, {0, 0, 0, 1}, {1, 1, 2, 0}, {0, 1, 0, 1}, {0, 0, 1, 0}, {1, 0, 0, 1}, {0, 0, 1, 0}, {0, 0, 0, 1}};
+			int[][] link = {{0, 0, 1, 5}, {2, 3, 0, 0}, {0, 1, 10, 0}, {1, 0, 4, 0}, {0, 0, 0, 3}, {6, 8, 0, 0}, {0, 5, 0, 7}, {0, 0, 6, 0}, {5, 0, 0, 9}, {0, 0, 8, 0}, {0, 0, 0, 2}};
+			
+			for(int i = 0; i < roomInfo.length; i++) {
+				int visited = 0;
+				if(i == 1 || i == 5) {
+					visited = 1;
+				} else if(i == 0) {
+					visited = 2;
+				}
+				roomInfo[i] = new Room(door[i], link[i], visited, map[i], setObstacles(currentStage, i), false);
 			}
-			roomInfo[i] = new Room(door[i], link[i], visited, map[i], setObstacles(stage, i), false);
+			
+			roomInfo = setSpecialRoom(currentStage, roomInfo);
+			roomInfo = setMonsters(currentStage, roomInfo);
+			
+			return roomInfo;
+		} else if(currentStage == 2) {
+			Room[] roomInfo = new Room[1];
+			int[][] map = {{2, 1}};
+			int[][] door = {{0, 0, 0, 0}};
+			int[][] link = {{0, 0, 0, 0}};
+			
+			roomInfo[0] = new Room(door[0], link[0], 2, map[0], setObstacles(currentStage, 0), false);
+			
+			return roomInfo;
 		}
-		
-		roomInfo = setSpecialRoom(stage, roomInfo);
-		roomInfo = setMonsters(stage, roomInfo);
-		
-		return roomInfo;
+		return null;
 	}
 	
 	private int[][] setObstacles(int stage, int roomNo) { // x, y, code

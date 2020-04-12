@@ -1135,8 +1135,27 @@
 					count++;
 					if(count >= 20) {
 						clearInterval(goNextInterval);
-						location.href="/gonext";
+						sendData();
 					}
 				}, 20);
 			}
+		}
+		
+		function sendData() {
+			const data = {
+				coin: playerInfo.coin,
+				bomb: playerInfo.bomb,
+				key: playerInfo.key,
+				weapon: playerInfo.weapon,
+				item: playerInfo.item,
+				status: playerInfo.status
+			};
+			
+			const xhr = new XMLHttpRequest();
+			xhr.open('POST', '/gonext');
+			xhr.setRequestHeader('Content-Type', 'application/json');
+			xhr.send(JSON.stringify(data));
+			xhr.onload = function(e) {
+				location.href = "/gonext";
+			};
 		}
