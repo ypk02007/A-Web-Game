@@ -13,7 +13,7 @@ import com.bog.model.Room;
 import com.bog.service.StageService;
 
 @Controller
-public class BOGController {
+public class MainController {
 	
 	@Autowired
 	private StageService stageService;

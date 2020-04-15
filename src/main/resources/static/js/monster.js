@@ -21,6 +21,10 @@ function monsterInit(monsterCode, x, y) {
 		monster = slug(x, y);
 		monster.img = monsterImgInit("slug.png", "480", "60");
 		monster.dir = Math.floor(Math.random() * 4);
+	case 5:
+		monster = dog(x, y);
+		monster.img = monsterImgInit("dog.png", "240", "80");
+		break;
 	}
 	
 	monster.setBoxes();
@@ -63,6 +67,7 @@ function knuckles(x, y) {
 			range: 0
 		},
 		counter : 0,
+		attack : [],
 		act: function() {
 			if(this.counter<4) {
 				this.move();
@@ -160,6 +165,7 @@ function sonic(x, y) {
 			speed: 2,
 			range: 0
 		},
+		attack : [],
 		act: function() {
 			this.superSonic();
 			this.move();
@@ -245,6 +251,7 @@ function hog(x, y) {
 			speed: 1,
 			range: 0
 		},
+		attack : [],
 		act: function() {
 			this.move();
 		},
@@ -320,6 +327,114 @@ function slug(x, y) {
 			range: 0
 		},
 		counter: 0,
+		attack : [],
+		act: function() {
+			if(this.counter%6 < 3) {
+				this.cropX = this.dir * 120;
+			} else {
+				this.cropX = this.dir * 120 + 60;
+			}
+			
+			this.move();
+			this.counter++;
+			if(this.counter >= 6) {
+				this.counter = 0;
+			}
+		},
+		move: function() {
+			var mx = this.moveBox.x;
+			var my = this.moveBox.y;
+			var roomEdge = [60, 360-this.moveBox.height, 60, 480-this.moveBox.width];
+			
+			switch(this.dir) {
+			case 3:
+				if(mx < roomEdge[3] && obstacleCheck(this.dir, this)) {
+					this.x += this.status.speed;
+					this.setBoxes();
+				} else {
+					this.dirChange();
+				}
+				break;
+			case 2:
+				if(mx > roomEdge[2] && obstacleCheck(this.dir, this)) {
+					this.x -= this.status.speed;
+					this.setBoxes();
+				} else {
+					this.dirChange();
+				}
+				break;
+			case 1:
+				if(my < roomEdge[1] && obstacleCheck(this.dir, this)) {
+					this.y += this.status.speed;
+					this.setBoxes();
+				} else {
+					this.dirChange();
+				}
+				break;
+			case 0:
+				if(my > roomEdge[0] && obstacleCheck(this.dir, this)) {
+					this.y -= this.status.speed;
+					this.setBoxes();
+				} else {
+					this.dirChange();
+				}
+				break;
+			}
+			
+		},
+		dirChange: function() {
+			while(true) {
+				var rand = Math.floor(Math.random() * 4);
+				if(rand != this.dir) {
+					this.dir = rand;
+					break;
+				}
+			}
+		},
+		setBoxes: function() {
+			this.moveBox.x = this.x + 10;
+			this.moveBox.y = this.y + 20;
+			this.hitBox.x = this.x + 5;
+			this.hitBox.y = this.y + 5;
+		},
+		damaged: function(dmg) {
+			this.status.life -= dmg;
+		}
+	};
+
+	return monster;
+}
+
+function dog(x, y) {
+	var monster = {
+		x: x,
+		y: y,
+		cropX: 0,
+		cropY: 0,
+		width: 60,
+		height: 60,
+		moveBox: {
+			x: 0,
+			y: 0,
+			width: 50,
+			height: 60
+		},
+		hitBox: {
+			x: 0,
+			y: 0,
+			width: 50,
+			height: 60
+		},
+		dir: 0,
+		img: null,
+		status: {
+			life: 4,
+			damage: 1,
+			speed: 2,
+			range: 0
+		},
+		counter: 0,
+		attack : [],
 		act: function() {
 			if(this.counter%6 < 3) {
 				this.cropX = this.dir * 120;

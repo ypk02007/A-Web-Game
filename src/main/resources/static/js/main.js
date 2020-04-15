@@ -268,7 +268,8 @@
 					cropY: 0,
 					width: 40,
 					height: 40,
-					count: 0
+					count: 0,
+					roomNo: roomNo
 				};
 				bombInfo = bombInfoInit;
 			}
@@ -520,25 +521,29 @@
 			return true;
 		}
 		
-		function explosionCheck() {
-			var mx = bombInfo.x + bomb.width/2;
-			var my = bombInfo.y + bomb.height/2;
+		function explosionCheck(where) {
+			var mx = bombInfo.x + bombInfo.width/2;
+			var my = bombInfo.y + bombInfo.height/2;
 			var ox;
 			var oy;
-			for(var i = 0; i < obstacleImg.length; i++) {
-				if(roomInfo[roomNo].obstacles[i][2] != 1) {
+			for(var i = 0; i < roomInfo[where].obstacles.length; i++) {
+				if(roomInfo[where].obstacles[i][2] != 1) {
 					continue;
 				}
-				ox = roomInfo[roomNo].obstacles[i][0] * 60 + 60 + 30;
-				oy = roomInfo[roomNo].obstacles[i][1] * 60 + 60 + 30;
+				ox = roomInfo[where].obstacles[i][0] * 60 + 60 + 30;
+				oy = roomInfo[where].obstacles[i][1] * 60 + 60 + 30;
 				
-				if(Math.abs(mx-ox) < (bomb.width + 60)/2 && Math.abs(my-oy) < (bomb.height + 60)/2) {
-					roomInfo[roomNo].obstacles[i][2] = 3;
-					obstacleImg[i].src = "img/sprite/stone_was_here.png";
+				if(Math.abs(mx-ox) < (bombInfo.width + 60)/2 && Math.abs(my-oy) < (bombInfo.height + 60)/2) {
+					roomInfo[where].obstacles[i][2] = 3;
+					if(where == roomNo) {
+						obstacleImg[i].src = "img/sprite/stone_was_here.png";
+					}
 				}
 			}
-			monsterDamagedCheck(bombInfo.x, bombInfo.y, 80, 10, true);
-			playerCollisionCheck(bombInfo.x, bombInfo.y, 80, 80, 2);
+			if(where == roomNo) {
+				monsterDamagedCheck(bombInfo.x, bombInfo.y, 80, 10, true);
+				playerCollisionCheck(bombInfo.x, bombInfo.y, 80, 80, 2);
+			}
 		}
 		
 		function playerCollisionCheck(objX, objY, objWidth, objHeight, dmg) { // monster, boss and their attack, bomb
@@ -757,7 +762,7 @@
 				bombInfo.height = 80;
 				bombInfo.x -= 20;
 				bombInfo.y -= 20;
-				explosionCheck();
+				explosionCheck(bombInfo.roomNo);
 			} else if(bombInfo.count == 55) {
 				bombInfo.cropX = 0;
 				bombInfo.cropY = 120;
@@ -766,7 +771,9 @@
 				return;
 			}
 			
-			ctx.drawImage(bombImg, bombInfo.cropX, bombInfo.cropY, bombInfo.width, bombInfo.height, bombInfo.x, bombInfo.y, bombInfo.width, bombInfo.height);
+			if(bombInfo.roomNo == roomNo) {
+				ctx.drawImage(bombImg, bombInfo.cropX, bombInfo.cropY, bombInfo.width, bombInfo.height, bombInfo.x, bombInfo.y, bombInfo.width, bombInfo.height);
+			}
 			
 			bombInfo.count++;
 		}
