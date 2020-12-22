@@ -913,6 +913,11 @@
 				monster[i].act();
 				ctx.drawImage(monster[i].img, monster[i].cropX, monster[i].cropY, monster[i].width, monster[i].height, monster[i].x, monster[i].y, monster[i].width, monster[i].height);
 				playerCollisionCheck(monster[i].hitBox.x, monster[i].hitBox.y, monster[i].hitBox.width, monster[i].hitBox.height, monster[i].status.damage);
+				
+				for(var j = 0; j < monster[i].attack.length; j++) {
+					ctx.drawImage(monster[i].img, monster[i].attack[j].cropX, monster[i].attack[j].cropY, monster[i].attack[j].size, monster[i].attack[j].size, monster[i].attack[j].x, monster[i].attack[j].y, monster[i].attack[j].size, monster[i].attack[j].size);
+					playerCollisionCheck(monster[i].attack[j].x, monster[i].attack[j].y, monster[i].attack[j].size, monster[i].attack[j].size, monster[i].status.damage);
+				}
 			}
 			if(bossInfo != null) { // boss exists
 				if(bossInfo.status.end > 30) { // the boss died

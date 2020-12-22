@@ -21,6 +21,7 @@ function monsterInit(monsterCode, x, y) {
 		monster = slug(x, y);
 		monster.img = monsterImgInit("slug.png", "480", "60");
 		monster.dir = Math.floor(Math.random() * 4);
+		break;
 	case 5:
 		monster = dog(x, y);
 		monster.img = monsterImgInit("dog.png", "240", "80");
@@ -436,16 +437,24 @@ function dog(x, y) {
 		counter: 0,
 		attack : [],
 		act: function() {
-			if(this.counter%6 < 3) {
-				this.cropX = this.dir * 120;
+			if(this.dir % 2 == 0) {
+				this.cropX = (this.counter < 50) ? 0 : 60;
 			} else {
-				this.cropX = this.dir * 120 + 60;
+				this.cropX = (this.counter < 50) ? 120 : 180;
 			}
 			
-			this.move();
+			if(this.counter < 50) {
+				this.move();
+			} else if(this.counter == 50) {
+				this.attackPattern();
+			}
+			
+			this.attackCheck();
+			
 			this.counter++;
-			if(this.counter >= 6) {
+			if(this.counter >= 80) {
 				this.counter = 0;
+				this.dirChange();
 			}
 		},
 		move: function() {
@@ -503,6 +512,44 @@ function dog(x, y) {
 			this.moveBox.y = this.y + 20;
 			this.hitBox.x = this.x + 5;
 			this.hitBox.y = this.y + 5;
+		},
+		attackPattern : function() {
+			var mx = [0, 0, -5, 5];
+			var my = [-5, 5, 0, 0];
+			for(var i = 0; i < 4; i++) {
+				var atk = {
+					x : this.x + 15,
+					y : this.y + 15,
+					mx : mx[i],
+					my : my[i],
+					cropX : 0,
+					cropY : 60,
+					size : 20
+				};
+				this.attack.push(atk);
+			}
+		},
+		attackCheck : function() {
+			var remove = [];
+			for(var i = 0; i < this.attack.length; i++) {
+				this.attack[i].x += this.attack[i].mx;
+				this.attack[i].y += this.attack[i].my;
+				if(this.pattern == 0) {
+					this.attack[i].cropX += 60;
+					if(this.attack[i].cropX >= 240) {
+						this.attack[i].cropX = 0;
+					}
+				}
+				if(this.attack[i].x < -this.attack[i].size || this.attack[i].x > 540 || this.attack[i].y < -this.attack[i].size || this.attack[i].y > 420) {
+					remove.push(i);
+				}
+			}
+			remove = remove.sort(function(a, b) {
+				return b-a;
+			});
+			for(var i = 0; i < remove.length; i++) {
+				this.attack.splice(remove[i], 1);
+			}
 		},
 		damaged: function(dmg) {
 			this.status.life -= dmg;
